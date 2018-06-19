@@ -2,6 +2,19 @@
 <html>
   <head>
     <link href="./botchat.css" rel="stylesheet" />
+    <script type="text/javascript">
+      window.GOOGLE_MAPS_JS_KEY = "AIzaSyBq6ccgYh3O8u0Hxjy7QaWIaebGPomd7kw";
+      (function (d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) {
+          return;
+        }
+        js = d.createElement(s);
+        js.id = id;
+        js.src = 'https://maps.googleapis.com/maps/api/js?key=' + window.GOOGLE_MAPS_JS_KEY;
+        fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'google-maps-js'));
+    </script>
   </head>
   <body>
     <div id="bot"/>
