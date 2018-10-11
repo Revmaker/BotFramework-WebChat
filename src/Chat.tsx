@@ -256,12 +256,6 @@ export class Chat extends React.Component<ChatProps, {}> {
                     onKeyDownCapture={ this._handleKeyDownCapture }
                     ref={ this._saveChatviewPanelRef }
                 >
-                    {
-                        !!state.format.chatTitle &&
-                            <div className="wc-header">
-                                <span>{ typeof state.format.chatTitle === 'string' ? state.format.chatTitle : state.format.strings.title }</span>
-                            </div>
-                    }
                     <MessagePane>
                         <History
                             onCardAction={ this._handleCardAction }
