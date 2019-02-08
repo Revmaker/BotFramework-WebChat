@@ -1,5 +1,5 @@
 import * as konsole from '../Konsole';
-import { Activity } from 'botframework-directlinejs';
+import { Activity, EventActivity } from 'botframework-directlinejs';
 
 // establish a limit so we don't exceed localstorage
 const MESSAGES_LIMIT = 500;
@@ -38,7 +38,14 @@ const removePersonalData = (message: Activity) => {
   return newMessage;
 };
 
-export const getStoredMessages = () => {
+export const clearStoredActivities = () => {
+  const storage = window.localStorage;
+  if (storage) {
+    storage.clear();
+  }
+}
+
+export const getStoredActivities = () => {
     try {
       const storage = window.localStorage;
       if (storage) {
@@ -52,7 +59,7 @@ export const getStoredMessages = () => {
     }
 }
 
-const storeMessage = (message: Activity) => {
+export const storeActivity = (message: Activity) => {
   try {
     const storage = window.localStorage;
     if (storage) {
@@ -67,5 +74,3 @@ const storeMessage = (message: Activity) => {
     konsole.log("Failed storing messages", err);
   }
 };
-
-export default storeMessage;

@@ -14,6 +14,7 @@ export function activityWithSuggestedActions(activities: Activity[]) {
         return lastActivity;
     }
 
+    /*
     if (lastActivity.replyToId) {
         const activityFilter = activities.filter(activity => activity.replyToId === lastActivity.replyToId
                                 && activity.suggestedActions
@@ -22,4 +23,5 @@ export function activityWithSuggestedActions(activities: Activity[]) {
             return activityFilter[0];
         }
     }
+    */
 }

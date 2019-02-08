@@ -84,6 +84,8 @@ export class ActivityView extends React.Component<ActivityViewProps, {}> {
 
             case 'typing':
                 return <div className="wc-typing"/>;
+            case 'event':
+                return <div></div>;
         }
     }
 }

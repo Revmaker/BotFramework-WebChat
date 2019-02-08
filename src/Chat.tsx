@@ -5,20 +5,29 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 
-import { Activity, IBotConnection, User, DirectLine, DirectLineOptions, CardActionTypes } from 'botframework-directlinejs';
-import { createStore, ChatActions, sendMessage, initializeConnection } from './Store';
+import { Activity, IBotConnection, User, DirectLine, DirectLineOptions, CardActionTypes, EventActivity } from 'botframework-directlinejs';
+import { createStore, ChatActions, sendMessage, initializeConnection, ChatState } from './Store';
 import { Provider } from 'react-redux';
 import { SpeechOptions } from './SpeechOptions';
 import { Speech } from './SpeechModule';
 import { ActivityOrID, FormatOptions } from './Types';
 import * as konsole from './Konsole';
 import { getTabIndex } from './getTabIndex';
-import { getStoredMessages } from './helpers/storeMessage';
+import { getStoredActivities, clearStoredActivities } from './helpers/storeActivity';
+import SplitPane from 'react-split-pane';
+import { Log } from './Log';
+import { State } from './State';
+import { Header } from './Header';
+
+export interface IVendorConfig {
+    name: string;
+    id: string;
+};
 
 export interface ChatProps {
     adaptiveCardsHostConfig: any,
     chatTitle?: boolean | string,
-    vendorId: string,
+    vendors: IVendorConfig[],
     secret: string,
     user: User,
     bot: User,
@@ -39,6 +48,7 @@ import { History } from './History';
 import { MessagePane } from './MessagePane';
 import { Shell, ShellFunctions } from './Shell';
 import axios from 'axios';
+import { string } from 'prop-types';
 
 export class Chat extends React.Component<ChatProps, {}> {
 
@@ -99,6 +109,9 @@ export class Chat extends React.Component<ChatProps, {}> {
             Speech.SpeechRecognizer.setSpeechRecognizer(props.speechOptions.speechRecognizer);
             Speech.SpeechSynthesizer.setSpeechSynthesizer(props.speechOptions.speechSynthesizer);
         }
+
+        this.onChangeVendor = this.onChangeVendor.bind(this);
+        this.setDirectLineOptions = this.setDirectLineOptions.bind(this);
     }
 
     private setSize() {
@@ -167,30 +180,52 @@ export class Chat extends React.Component<ChatProps, {}> {
         this.shellRef = shellWrapper && shellWrapper.getWrappedInstance();
     }
 
-    componentDidMount() {
-        // Now that we're mounted, we know our dimensions. Put them in the store (this will force a re-render)
-        this.setSize();
+    private onChangeVendor(vendor: IVendorConfig) {
+        clearStoredActivities();
+        
+        this.store.dispatch<ChatActions>({ 
+            type: "Clear_History",
+        });
 
-        // Configure directline options
+        this.setDirectLineOptions(vendor);
+    }
+
+    private setDirectLineOptions(vendor: IVendorConfig) {
         this.store.dispatch<ChatActions>({ 
             type: "Configure_DirectLine_Options",
             user: this.props.user,
             bot: this.props.bot,
             secret: this.props.secret, 
-            vendorId: this.props.vendorId
+            vendorId: vendor.id, 
         });
+    }
 
-        const storedMessages = getStoredMessages();
+    componentDidMount() {
+        // Now that we're mounted, we know our dimensions. Put them in the store (this will force a re-render)
+        this.setSize();
+
+        // Configure directline options
+        this.setDirectLineOptions(this.props.vendors[0]);
+
+        // Get all activies in storage
+        const storedActivities = getStoredActivities();
 
         // Activities in storage, add them to history.
-        if (storedMessages.length > 0) {
-            storedMessages.forEach((activity: Activity) => {
+        if (storedActivities.length > 0) {
+            storedActivities.filter((activity: Activity) => activity.type == 'message')
+            .forEach((activity: Activity) => {
               this.store.dispatch<ChatActions>({ activity, type: "Add_Message"});
+            });
+
+            storedActivities.filter((activity: EventActivity) => activity.type == 'event')
+            .forEach((activity: EventActivity) => {
+              this.store.dispatch<ChatActions>({ activity, type: "Add_Event"});
             });
         } 
         
         // Nothing in storage, fetch initial messages.
         else {
+            /*
             axios.request<Activity[]>({
                 method: 'GET',
                 url: this.props.actionEndpointUrl,
@@ -201,6 +236,7 @@ export class Chat extends React.Component<ChatProps, {}> {
                     this.store.dispatch<ChatActions>({ activity, type: "Receive_Message"})
                 });
             })
+            */
         }
 
         if (this.props.resize === 'window')
@@ -251,32 +287,35 @@ export class Chat extends React.Component<ChatProps, {}> {
         const state = this.store.getState();
         konsole.log("BotChat.Chat state", state);
 
+        const headerTitle = typeof state.format.chatTitle === 'string' ? state.format.chatTitle : state.format.strings.title;
+
         // only render real stuff after we know our dimensions
         return (
             <Provider store={ this.store }>
-                <div
-                    className="wc-chatview-panel"
-                    onKeyDownCapture={ this._handleKeyDownCapture }
-                    ref={ this._saveChatviewPanelRef }
-                >
-                    {
-                        !!state.format.chatTitle &&
-                            <div className="wc-header">
-                                <span>{ typeof state.format.chatTitle === 'string' ? state.format.chatTitle : state.format.strings.title }</span>
-                            </div>
-                    }
-                    <MessagePane>
-                        <History
-                            onCardAction={ this._handleCardAction }
-                            ref={ this._saveHistoryRef }
-                        />
-                    </MessagePane>
-                    <Shell ref={ this._saveShellRef } />
-                    {
-                        this.props.resize === 'detect' &&
-                            <ResizeDetector onresize={ this.resizeListener } />
-                    }
-                </div>
+                <SplitPane split="vertical" minSize={600} primary="second">
+                    <div
+                        className="wc-chatview-panel"
+                        onKeyDownCapture={ this._handleKeyDownCapture }
+                        ref={ this._saveChatviewPanelRef }
+                    >
+                        <Header title={headerTitle} onChangeVendor={this.onChangeVendor} vendors={this.props.vendors} />
+                        <MessagePane>
+                            <History
+                                onCardAction={ this._handleCardAction }
+                                ref={ this._saveHistoryRef }
+                            />
+                        </MessagePane>
+                        <Shell ref={ this._saveShellRef } />
+                        {
+                            this.props.resize === 'detect' &&
+                                <ResizeDetector onresize={ this.resizeListener } />
+                        }
+                    </div>
+                    <SplitPane split="horizontal" minSize={300} primary="second">
+                        <Log />
+                        <State />
+                    </SplitPane>
+                </SplitPane>
             </Provider>
         );
     }
@@ -306,7 +345,6 @@ export const doCardAction = (
                 sendMessage(text);
             break;
         case "postBack":
-            console.log('POST_BACK');
             sendPostBack(text, value);
             addMessage(buttonTitle, from, locale);
             break;

@@ -7,7 +7,7 @@ import { Speech } from './SpeechModule';
 import { ActivityOrID } from './Types';
 import { HostConfig } from 'adaptivecards';
 import * as konsole from './Konsole';
-import storeMessage from './helpers/storeMessage';
+import { storeActivity } from './helpers/storeActivity';
 
 // Reducers - perform state transformations
 
@@ -25,6 +25,9 @@ export type ThunkInterface<R> = ThunkAction<R, ChatState, void>;
 export function initializeConnection(): ThunkInterface<Promise<{}>> {
     return (dispatch: Dispatch<ChatState>, getState) => {
         const { secret, vendorId, user, bot, selectedActivity } = getState().connection;
+
+        console.log('INITIALIZE_CONNECTION');
+        console.log(vendorId);
 
         return new Promise((resolve) => {
             const directLine = new DirectLine({
@@ -79,6 +82,10 @@ export function initializeConnection(): ThunkInterface<Promise<{}>> {
                         case "typing": {
                             if (activity.from.id !== user.id)
                                 dispatch(showTyping(activity));
+                            break;
+                        }
+                        case "event": {
+                            dispatch(receiveEvent(activity));
                             break;
                         }
                     }
@@ -151,6 +158,10 @@ export function sendPostBack(text: string, value: object): ThunkInterface<Promis
     };
 }
 
+export const clearHistory = () => ({
+    type: 'Clear_History',
+    } as ChatActions);
+
 export const receiveSentMessage = (activity: Activity) => ({
     type: 'Receive_Sent_Message',
     activity,
@@ -158,6 +169,11 @@ export const receiveSentMessage = (activity: Activity) => ({
 
 export const receiveMessage = (activity: Activity) => ({
     type: 'Receive_Message',
+    activity,
+    } as ChatActions);
+
+export const receiveEvent = (activity: Activity) => ({
+    type: 'Receive_Event',
     activity,
     } as ChatActions);
 
@@ -456,6 +472,7 @@ export const connection: Reducer<ConnectionState> = (
         case 'Configure_DirectLine_Options':
             return {
                 ... state,
+                connectionStatus: ConnectionStatus.Uninitialized,
                 user: action.user,
                 bot: action.bot,
                 secret: action.secret, 
@@ -487,7 +504,7 @@ export interface HistoryState {
 }
 
 export type MessageHistoryAction = {
-    type: 'Receive_Message' | 'Send_Message' | 'Show_Typing' | 'Receive_Sent_Message' | 'Add_Message'
+    type: 'Receive_Message' | 'Receive_Event' | 'Send_Message' | 'Show_Typing' | 'Receive_Sent_Message' | 'Add_Message' | 'Add_Event'
     activity: Activity
 };
 
@@ -507,6 +524,8 @@ export type HistoryAction = MessageHistoryAction | {
 } | {
     type: 'Clear_Typing',
     id: string
+} | {
+    type: 'Clear_History',
 }
 
 const copyArrayWithUpdatedItem = <T>(array: Array<T>, i: number, item: T) => [
@@ -556,7 +575,21 @@ export const history: Reducer<HistoryState> = (
                 ]
             };
 
+        case 'Receive_Event':
+            if (state.activities.find(a => a.id === action.activity.id)) return state; // don't allow duplicate messages
+
+            return {
+                ... state,
+                activities: [
+                    ... state.activities.filter(activity => activity.type !== "typing"),
+                    action.activity,
+                    ... state.activities.filter(activity => activity.from.id !== action.activity.from.id && activity.type === "typing"),
+                ]
+            };
+
+
         case 'Add_Message':
+        case 'Add_Event':
         case 'Send_Message':
             return {
                 ... state,
@@ -623,6 +656,12 @@ export const history: Reducer<HistoryState> = (
                 ... state,
                 activities: state.activities.filter(activity => activity.id !== action.id),
                 selectedActivity: state.selectedActivity && state.selectedActivity.id === action.id ? null : state.selectedActivity
+            };
+
+        case 'Clear_History':
+            return {
+                ... state,
+                activities: [],
             };
 
         case 'Select_Activity':
@@ -896,10 +935,10 @@ const sendTypingEpic: Epic<ChatActions, ChatState> = (action$, store) =>
         .catch(error => Observable.of(nullAction))
     );
 
-const storeMessageEpic: Epic<ChatActions, ChatState> = (action$) =>
-    action$.ofType('Receive_Message', 'Send_Message')
+const storeActivityEpic: Epic<ChatActions, ChatState> = (action$) =>
+    action$.ofType('Receive_Message', 'Receive_Event', 'Send_Message')
     .map((action: MessageHistoryAction) => {
-        storeMessage(action.activity);
+        storeActivity(action.activity);
         return nullAction;
     });
 
@@ -935,7 +974,7 @@ export const createStore = () =>
                 stopListeningEpic,
                 stopSpeakingEpic,
                 listeningSilenceTimeoutEpic,
-                storeMessageEpic
+                storeActivityEpic
             ))
         )
     );
