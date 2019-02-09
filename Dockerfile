@@ -1,4 +1,4 @@
-from node:8
+from node:9.4.0
 
 # Add repo into container
 ADD . /src
