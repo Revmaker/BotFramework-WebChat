@@ -1,9 +1,9 @@
 #! /bin/bash
 
 readonly VERSION_FILE="VERSION"
-readonly REL_FILE_PREFIX="botv2-web"
+readonly REL_FILE_PREFIX="botv2-web-devtools"
 readonly TOP_PID=$$
-readonly BRANCH="master"
+readonly BRANCH="cl-devtools"
 trap "exit 1" TERM
 
 exit_script() {
@@ -12,10 +12,10 @@ exit_script() {
 
 build() {
     local release_file="${REL_FILE_PREFIX}_$1.zip"
-    docker build -t botv2-web . &&
-        docker create --name botv2-web-image botv2-web &&
-        docker cp botv2-web-image:/src/release "./release" &&
-        docker rm botv2-web-image
+    docker build -t botv2-web-devtools . &&
+        docker create --name botv2-web-devtools-image botv2-web-devtools &&
+        docker cp botv2-web-devtools-image:/src/release "./release" &&
+        docker rm botv2-web-devtools-image
     if [ "$?" -ne 0 ]
     then
         echo "Failed to build release"
@@ -49,11 +49,11 @@ commit_and_tag() {
     fi
 }
 
-push_master() {
+push_cl-devtools() {
     git push origin $BRANCH
     if [ "$?" -ne 0 ]
     then
-        echo "Failed to push new version commit to master"
+        echo "Failed to push new version commit to cl-devtools"
         exit_script
     fi
 }
@@ -62,7 +62,7 @@ push_tag() {
     git push origin $1
     if [ "$?" -ne 0 ]
     then
-        echo "Failed to push tag to master"
+        echo "Failed to push tag to cl-devtools"
         exit_script
     fi
 }
@@ -72,7 +72,7 @@ main() {
     build $version
     update_version $version
     commit_and_tag $version
-    push_master
+    push_cl-devtools
     push_tag $version
     exit 0
 }
