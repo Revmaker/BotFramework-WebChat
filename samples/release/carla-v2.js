@@ -393,6 +393,12 @@ var carlaBot = (function () {
           }
         });
 
+        FB.Event.subscribe('xfbml.render', () => {
+          if(_fbRoot.style.display === 'none'){
+            _chatToDisplay("web");
+          }
+        });
+
         // Subscribe To Authentication Events Especially After When User Gives Authorization To App
         FB.Event.subscribe('auth.statusChange', function(response) {
           if (response.status === 'connected') {
