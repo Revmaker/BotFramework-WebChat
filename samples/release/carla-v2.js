@@ -360,6 +360,11 @@ var carlaBot = (function () {
         return false;
       }
 
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', 'https://connect.facebook.net', true);
+      xhr.onerror = _chatToDisplay("web");
+      xhr.send();
+
       _loadFaceBookSDK();
 
       _fbRoot.style.display = "none";
