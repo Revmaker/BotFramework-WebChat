@@ -331,6 +331,14 @@ var carlaBot = (function () {
       }
     };
 
+    var _setChatWebLater = function(){
+      setTimeout(function(){
+        if(_fbRoot.style.display === 'none'){
+          _chatToDisplay("web");
+        }
+      },2000);
+    }
+
     var initCarlaBot = function () {
       __carlaBotStateController.setInitialState();
 
@@ -362,7 +370,7 @@ var carlaBot = (function () {
 
       var xhr = new XMLHttpRequest();
       xhr.open('GET', 'https://connect.facebook.net', true);
-      xhr.onerror = _chatToDisplay("web");
+      xhr.onerror = _setChatWebLater();
       xhr.send();
 
       _loadFaceBookSDK();
@@ -399,9 +407,7 @@ var carlaBot = (function () {
         });
 
         FB.Event.subscribe('xfbml.render', () => {
-          if(_fbRoot.style.display === 'none'){
-            _chatToDisplay("web");
-          }
+          _setChatWebLater();
         });
 
         // Subscribe To Authentication Events Especially After When User Gives Authorization To App
