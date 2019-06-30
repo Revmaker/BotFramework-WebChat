@@ -265,7 +265,7 @@ var carlaBot = (function () {
     }
 
     var displayBot = function () {
-        if(document.contains(_chatWidget)){
+        if(document.body.contains(_chatWidget)){
             return;
         }
         if (!__carlaBotHelpers.isSmallScreen()) {
