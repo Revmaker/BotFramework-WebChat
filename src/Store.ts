@@ -897,7 +897,7 @@ const sendTypingEpic: Epic<ChatActions, ChatState> = (action$, store) =>
     );
 
 const storeMessageEpic: Epic<ChatActions, ChatState> = (action$) =>
-    action$.ofType('Receive_Message', 'Send_Message')
+    action$.ofType('Receive_Message', 'Send_Message', 'Add_Message')
     .map((action: MessageHistoryAction) => {
         storeMessage(action.activity);
         return nullAction;

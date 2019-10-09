@@ -306,7 +306,6 @@ export const doCardAction = (
                 sendMessage(text);
             break;
         case "postBack":
-            console.log('POST_BACK');
             sendPostBack(text, value);
             addMessage(buttonTitle, from, locale);
             break;
