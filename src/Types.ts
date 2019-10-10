@@ -3,6 +3,7 @@ import { Activity } from 'botframework-directlinejs';
 declare global {
   interface Window {
     CMS_URL: string;
+    buttonClickCallback: (payload: object) => void;
   }
 }
 
