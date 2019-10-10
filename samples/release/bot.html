@@ -66,6 +66,9 @@
         bot: { id: 'botid' },
         vendorId: VENDOR_ID,
         resize: 'detect',
+        buttonClickCallback: (value) => {
+          console.log('BUTTON_CLICK', value);
+        },
         actionEndpointUrl: actionEndpointUrl,
         sentryDsn: SENTRY_DSN,
         sentryEnvironment: SENTRY_ENVIRONMENT,

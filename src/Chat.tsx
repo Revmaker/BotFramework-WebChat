@@ -20,6 +20,7 @@ export interface ChatProps {
     chatTitle?: boolean | string,
     vendorId: string,
     secret: string,
+    buttonClickCallback: (payload: object) => void,
     user: User,
     bot: User,
     botConnection: DirectLine,
@@ -171,6 +172,10 @@ export class Chat extends React.Component<ChatProps, {}> {
         // Now that we're mounted, we know our dimensions. Put them in the store (this will force a re-render)
         this.setSize();
 
+        if (this.props.buttonClickCallback) {
+          window.buttonClickCallback = this.props.buttonClickCallback; 
+        }
+
         // Configure directline options
         this.store.dispatch<ChatActions>({ 
             type: "Configure_DirectLine_Options",
@@ -300,13 +305,27 @@ export const doCardAction = (
     const text = (typeof actionValue === 'string') ? actionValue as string : undefined;
     const value = (typeof actionValue === 'object')? actionValue as object : undefined;
 
+    try {
+      if (!window.buttonClickCallback) {
+        throw new Error("No callback defined");
+      }
+
+      const payload = JSON.parse(text);
+      if (payload.localResponse.route === undefined || payload.localResponse.route === null) {
+        throw new Error("Invalid route payload");
+      }
+
+      window.buttonClickCallback(payload);
+    } catch(error) {
+      // Do nothing
+    }
+
     switch (type) {
         case "imBack":
             if (typeof text === 'string')
                 sendMessage(text);
             break;
         case "postBack":
-            console.log('POST_BACK');
             sendPostBack(text, value);
             addMessage(buttonTitle, from, locale);
             break;
@@ -346,7 +365,7 @@ export const doCardAction = (
         */
         default:
             konsole.log("unknown button type", type);
-        }
+    }
 }
 
 export const renderIfNonempty = (value: any, renderer: (value: any) => JSX.Element ) => {
