@@ -31,9 +31,10 @@ export interface ChatProps {
     sendTyping?: boolean,
     showUploadButton?: boolean,
     formatOptions?: FormatOptions,
-    sentryDsn: string;
-    sentryEnvironment: string;
-    resize?: 'none' | 'window' | 'detect'
+    sentryDsn: string,
+    sentryEnvironment: string,
+    resize?: 'none' | 'window' | 'detect',
+    cmsUrl: string
 }
 
 import { History } from './History';
@@ -173,15 +174,19 @@ export class Chat extends React.Component<ChatProps, {}> {
         this.setSize();
 
         if (this.props.buttonClickCallback) {
-          window.buttonClickCallback = this.props.buttonClickCallback; 
+            window.buttonClickCallback = this.props.buttonClickCallback;
+        }
+
+        if (this.props.cmsUrl) {
+            window.CMS_URL = this.props.cmsUrl;
         }
 
         // Configure directline options
-        this.store.dispatch<ChatActions>({ 
+        this.store.dispatch<ChatActions>({
             type: "Configure_DirectLine_Options",
             user: this.props.user,
             bot: this.props.bot,
-            secret: this.props.secret, 
+            secret: this.props.secret,
             vendorId: this.props.vendorId
         });
 
@@ -190,22 +195,22 @@ export class Chat extends React.Component<ChatProps, {}> {
         // Activities in storage, add them to history.
         if (storedMessages.length > 0) {
             storedMessages.forEach((activity: Activity) => {
-              this.store.dispatch<ChatActions>({ activity, type: "Add_Message"});
+                this.store.dispatch<ChatActions>({ activity, type: "Add_Message" });
             });
-        } 
-        
+        }
+
         // Nothing in storage, fetch initial messages.
         else {
             axios.request<Activity[]>({
                 method: 'GET',
                 url: this.props.actionEndpointUrl,
             })
-            .then((response) => {
-                const { data } = response
-                data.forEach((activity) => { 
-                    this.store.dispatch<ChatActions>({ activity, type: "Receive_Message"})
-                });
-            })
+                .then((response) => {
+                    const { data } = response
+                    data.forEach((activity) => {
+                        this.store.dispatch<ChatActions>({ activity, type: "Receive_Message" })
+                    });
+                })
         }
 
         if (this.props.resize === 'window')
@@ -258,28 +263,28 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         // only render real stuff after we know our dimensions
         return (
-            <Provider store={ this.store }>
+            <Provider store={this.store}>
                 <div
                     className="wc-chatview-panel"
-                    onKeyDownCapture={ this._handleKeyDownCapture }
-                    ref={ this._saveChatviewPanelRef }
+                    onKeyDownCapture={this._handleKeyDownCapture}
+                    ref={this._saveChatviewPanelRef}
                 >
                     {
                         !!state.format.chatTitle &&
-                            <div className="wc-header">
-                                <span>{ typeof state.format.chatTitle === 'string' ? state.format.chatTitle : state.format.strings.title }</span>
-                            </div>
+                        <div className="wc-header">
+                            <span>{typeof state.format.chatTitle === 'string' ? state.format.chatTitle : state.format.strings.title}</span>
+                        </div>
                     }
                     <MessagePane>
                         <History
-                            onCardAction={ this._handleCardAction }
-                            ref={ this._saveHistoryRef }
+                            onCardAction={this._handleCardAction}
+                            ref={this._saveHistoryRef}
                         />
                     </MessagePane>
-                    <Shell ref={ this._saveShellRef } />
+                    <Shell ref={this._saveShellRef} />
                     {
                         this.props.resize === 'detect' &&
-                            <ResizeDetector onresize={ this.resizeListener } />
+                        <ResizeDetector onresize={this.resizeListener} />
                     }
                 </div>
             </Provider>
@@ -302,82 +307,82 @@ export const doCardAction = (
     actionValue,
     buttonTitle
 ) => {
-    const text = (typeof actionValue === 'string') ? actionValue as string : undefined;
-    const value = (typeof actionValue === 'object')? actionValue as object : undefined;
+        const text = (typeof actionValue === 'string') ? actionValue as string : undefined;
+        const value = (typeof actionValue === 'object') ? actionValue as object : undefined;
 
-    try {
-      if (!window.buttonClickCallback) {
-        throw new Error("No callback defined");
-      }
+        try {
+            if (!window.buttonClickCallback) {
+                throw new Error("No callback defined");
+            }
 
-      const payload = JSON.parse(text);
-      if (payload.localResponse.route === undefined || payload.localResponse.route === null) {
-        throw new Error("Invalid route payload");
-      }
+            const payload = JSON.parse(text);
+            if (payload.localResponse.route === undefined || payload.localResponse.route === null) {
+                throw new Error("Invalid route payload");
+            }
 
-      window.buttonClickCallback(payload);
-    } catch(error) {
-      // Do nothing
+            window.buttonClickCallback(payload);
+        } catch (error) {
+            // Do nothing
+        }
+
+        switch (type) {
+            case "imBack":
+                if (typeof text === 'string')
+                    sendMessage(text);
+                break;
+            case "postBack":
+                sendPostBack(text, value);
+                addMessage(buttonTitle, from, locale);
+                break;
+            case "locationButton":
+                if ("geolocation" in navigator) {
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        const locationMessage = getLocationMessage(position.coords.latitude, position.coords.longitude);
+                        sendPostBack(locationMessage, value);
+                        addMessage(buttonTitle, from, locale);
+                    });
+                }
+                break;
+            case "call":
+            case "openUrl":
+            case "playAudio":
+            case "playVideo":
+            case "showImage":
+            case "downloadFile":
+                window.open(text);
+                break;
+            // TODO: Re-enable
+            /*
+            case "signin":
+                let loginWindow =  window.open();
+                if (botConnection.getSessionId)  {
+                    botConnection.getSessionId().subscribe(sessionId => {
+                        konsole.log("received sessionId: " + sessionId);
+                        loginWindow.location.href = text + encodeURIComponent('&code_challenge=' + sessionId);
+                    }, error => {
+                        konsole.log("failed to get sessionId", error);
+                    });
+                }
+                else {
+                    loginWindow.location.href = text;
+                }
+                break;
+            */
+            default:
+                konsole.log("unknown button type", type);
+        }
     }
 
-    switch (type) {
-        case "imBack":
-            if (typeof text === 'string')
-                sendMessage(text);
-            break;
-        case "postBack":
-            sendPostBack(text, value);
-            addMessage(buttonTitle, from, locale);
-            break;
-        case "locationButton":
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    const locationMessage = getLocationMessage(position.coords.latitude, position.coords.longitude);
-                    sendPostBack(locationMessage, value);
-                    addMessage(buttonTitle, from, locale);
-                });
-            }
-            break;
-        case "call":
-        case "openUrl":
-        case "playAudio":
-        case "playVideo":
-        case "showImage":
-        case "downloadFile":
-            window.open(text);
-            break;
-        // TODO: Re-enable
-        /*
-        case "signin":
-            let loginWindow =  window.open();
-            if (botConnection.getSessionId)  {
-                botConnection.getSessionId().subscribe(sessionId => {
-                    konsole.log("received sessionId: " + sessionId);
-                    loginWindow.location.href = text + encodeURIComponent('&code_challenge=' + sessionId);
-                }, error => {
-                    konsole.log("failed to get sessionId", error);
-                });
-            }
-            else {
-                loginWindow.location.href = text;
-            }
-            break;
-        */
-        default:
-            konsole.log("unknown button type", type);
-    }
-}
-
-export const renderIfNonempty = (value: any, renderer: (value: any) => JSX.Element ) => {
+export const renderIfNonempty = (value: any, renderer: (value: any) => JSX.Element) => {
     if (value !== undefined && value !== null && (typeof value !== 'string' || value.length > 0))
         return renderer(value);
 }
 
-export const classList = (...args:(string | boolean)[]) => {
+export const classList = (...args: (string | boolean)[]) => {
     return args.filter(Boolean).join(' ');
 }
 
-const getLocationMessage = function(lat: number, long: number) {
+const getLocationMessage = function (lat: number, long: number) {
     const message = {
         localResponse: {
             result: {
@@ -398,11 +403,11 @@ const ResizeDetector = (props: {
 }) =>
     // adapted to React from https://github.com/developit/simple-element-resize-detector
     <iframe
-        style={ { position: 'absolute', left: '0', top: '-100%', width: '100%', height: '100%', margin: '1px 0 0', border: 'none', opacity: 0, visibility: 'hidden', pointerEvents: 'none' } }
-        ref={ frame => {
+        style={{ position: 'absolute', left: '0', top: '-100%', width: '100%', height: '100%', margin: '1px 0 0', border: 'none', opacity: 0, visibility: 'hidden', pointerEvents: 'none' }}
+        ref={frame => {
             if (frame)
                 frame.contentWindow.onresize = props.onresize;
-        } }
+        }}
     />;
 
 // For auto-focus in some browsers, we synthetically insert keys into the chatbox.
