@@ -224,6 +224,7 @@ export const Shell = connect(
     sendFiles
 }, (stateProps: any, dispatchProps: any, ownProps: any): Props => ({
     // from stateProps
+    customSendSvg: ownProps.customSendSvg,
     locale: stateProps.locale,
     botConnection: stateProps.botConnection,
     connectionStatus: stateProps.connectionStatus,
