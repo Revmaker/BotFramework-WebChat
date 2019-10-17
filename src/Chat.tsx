@@ -34,7 +34,8 @@ export interface ChatProps {
     sentryDsn: string,
     sentryEnvironment: string,
     resize?: 'none' | 'window' | 'detect',
-    cmsUrl: string
+    cmsUrl: string,
+    customSendSvg: any
 }
 
 import { History } from './History';
@@ -281,7 +282,7 @@ export class Chat extends React.Component<ChatProps, {}> {
                             ref={this._saveHistoryRef}
                         />
                     </MessagePane>
-                    <Shell ref={this._saveShellRef} />
+                    <Shell ref={this._saveShellRef} customSendSvg={this.props.customSendSvg} />
                     {
                         this.props.resize === 'detect' &&
                         <ResizeDetector onresize={this.resizeListener} />
