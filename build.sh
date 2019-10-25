@@ -1,4 +1,4 @@
-#! /bin/bash   
+#! /bin/bash
 
 readonly VERSION_FILE="VERSION"
 readonly REL_FILE_PREFIX="botv2-web-v2-bot"
