@@ -1,9 +1,9 @@
 #! /bin/bash
 
 readonly VERSION_FILE="VERSION"
-readonly REL_FILE_PREFIX="botv2-web-no-reboot"
+readonly REL_FILE_PREFIX="botv2-web-v2-bot"
 readonly TOP_PID=$$
-readonly BRANCH="no-reboot"
+readonly BRANCH="v2-bot"
 trap "exit 1" TERM
 
 exit_script() {
