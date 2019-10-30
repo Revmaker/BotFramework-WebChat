@@ -328,6 +328,12 @@ export const doCardAction = (
                 throw new Error("Invalid route payload");
             }
 
+            // If client supplied customData, send it in with the
+            // payload so we can do something with it in Shopbot
+            if (window.customData) {
+                JSON.parse(text).localResponse.customData = window.customData;
+            }
+
             window.buttonClickCallback(payload);
         } catch (error) {
             // Do nothing
