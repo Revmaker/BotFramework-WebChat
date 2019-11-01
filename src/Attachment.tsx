@@ -23,18 +23,18 @@ export interface QueryParams {
 
 export const queryParams = (src: string) =>
     src
-    .substr(1)
-    .split('&')
-    .reduce((previous, current) => {
-        const keyValue = current.split('=');
-        previous[decodeURIComponent(keyValue[0])] = decodeURIComponent(keyValue[1]);
-        return previous;
-    }, {} as QueryParams);
+        .substr(1)
+        .split('&')
+        .reduce((previous, current) => {
+            const keyValue = current.split('=');
+            previous[decodeURIComponent(keyValue[0])] = decodeURIComponent(keyValue[1]);
+            return previous;
+        }, {} as QueryParams);
 
 const queryString = (query: QueryParams) =>
     Object.keys(query)
-    .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(query[key].toString()))
-    .join('&');
+        .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(query[key].toString()))
+        .join('&');
 
 const exists = (value: any) => value != null && typeof value != "undefined";
 
@@ -44,11 +44,11 @@ const Youtube = (props: {
     loop?: boolean
 }) =>
     <iframe
-        src={ `https://${YOUTUBE_DOMAIN}/embed/${props.embedId}?${queryString({
+        src={`https://${YOUTUBE_DOMAIN}/embed/${props.embedId}?${queryString({
             modestbranding: '1',
             loop: props.loop ? '1' : '0',
             autoplay: props.autoPlay ? '1' : '0'
-        })}` }
+        })}`}
     />;
 
 const Vimeo = (props: {
@@ -57,14 +57,14 @@ const Vimeo = (props: {
     loop?: boolean
 }) =>
     <iframe
-        src={ `https://player.${VIMEO_DOMAIN}/video/${props.embedId}?${queryString({
+        src={`https://player.${VIMEO_DOMAIN}/video/${props.embedId}?${queryString({
             title: '0',
             byline: '0',
             portrait: '0',
             badge: '0',
             autoplay: props.autoPlay ? '1' : '0',
             loop: props.loop ? '1' : '0'
-        })}` }
+        })}`}
     />;
 
 interface VideoProps {
@@ -87,21 +87,21 @@ const Video = (props: VideoProps) => {
         case YOUTUBE_WWW_DOMAIN:
         case YOUTUBE_WWW_SHORT_DOMAIN:
             return <Youtube
-                embedId={ url.hostname === YOUTUBE_DOMAIN || url.hostname === YOUTUBE_WWW_DOMAIN ? urlQueryParams['v'] : pathSegments[pathSegments.length-1] }
-                autoPlay={ props.autoPlay }
-                loop={ props.loop }
+                embedId={url.hostname === YOUTUBE_DOMAIN || url.hostname === YOUTUBE_WWW_DOMAIN ? urlQueryParams['v'] : pathSegments[pathSegments.length - 1]}
+                autoPlay={props.autoPlay}
+                loop={props.loop}
             />;
 
         case VIMEO_WWW_DOMAIN:
         case VIMEO_DOMAIN:
             return <Vimeo
-                embedId={ pathSegments[pathSegments.length-1] }
-                autoPlay={ props.autoPlay }
-                loop={ props.loop }
+                embedId={pathSegments[pathSegments.length - 1]}
+                autoPlay={props.autoPlay}
+                loop={props.loop}
             />
 
         default:
-            return <video controls { ... props } />
+            return <video controls {...props} />
     }
 }
 
@@ -117,11 +117,11 @@ const Media = (props: {
 }) => {
     switch (props.type) {
         case 'video':
-            return <Video { ...props as VideoProps }  />
+            return <Video {...props as VideoProps} />
         case 'audio':
-            return <audio controls { ... props } />;
+            return <audio controls {...props} />;
         default:
-            return <img { ... props } />;
+            return <img {...props} />;
     }
 }
 
@@ -132,11 +132,11 @@ const Unknown = (props: {
     name: string
 }) => {
     if (regExpCard.test(props.contentType)) {
-        return <span>{ props.format.strings.unknownCard.replace('%1', props.contentType) }</span>;
+        return <span>{props.format.strings.unknownCard.replace(new RegExp('%1'), props.contentType)}</span>;
     } else if (props.contentUrl) {
-        return <div><a className="wc-link-download" href={ props.contentUrl } target="_blank" title={ props.contentUrl }><div className="wc-text-download">{ props.name || props.format.strings.unknownFile.replace('%1', props.contentType) }</div><div className="wc-icon-download"></div></a></div>;
+        return <div><a className="wc-link-download" href={props.contentUrl} target="_blank" title={props.contentUrl}><div className="wc-text-download">{props.name || props.format.strings.unknownFile.replace(new RegExp('%1'), props.contentType)}</div><div className="wc-icon-download"></div></a></div>;
     } else {
-        return <span>{ props.format.strings.unknownFile.replace('%1', props.contentType) }</span>;
+        return <span>{props.format.strings.unknownFile.replace(new RegExp('%1'), props.contentType)}</span>;
     }
 }
 
@@ -159,7 +159,7 @@ export const AttachmentView = (props: {
     const attachedImage = (
         images: CardImage[]
     ) => images && images.length > 0 &&
-        <Media src={ images[0].url } onLoad={ props.onImageLoad } onClick={ onCardAction(images[0].tap) } alt={ images[0].alt } />;
+        <Media src={images[0].url} onLoad={props.onImageLoad} onClick={onCardAction(images[0].tap)} alt={images[0].alt} />;
     const getRichCardContentMedia = (
         type: 'image' | 'video' | 'audio' | { (url: string): 'image' | 'video' | 'audio' },
         content: {
@@ -184,15 +184,15 @@ export const AttachmentView = (props: {
         }
         // rendering every media in the media array. Validates every type as image, video, audio or a function that returns those values.
         return content.media.map((md, i) => {
-            let t = (typeof type === 'string')? type : type(md.url);
+            let t = (typeof type === 'string') ? type : type(md.url);
             return <Media
-                type={ t }
-                src={ md.url }
-                onLoad={ props.onImageLoad }
-                poster={ content.image && content.image.url }
-                autoPlay={ content.autostart }
-                loop={ content.autoloop }
-                key={ i } />
+                type={t}
+                src={md.url}
+                onLoad={props.onImageLoad}
+                poster={content.image && content.image.url}
+                autoPlay={content.autostart}
+                loop={content.autoloop}
+                key={i} />
         });
     };
     switch (attachment.contentType) {
@@ -223,14 +223,14 @@ export const AttachmentView = (props: {
                 thumbnailCardBuilder.addCommon(attachment.content);
             }
             return (
-                <AdaptiveCardContainer className="thumbnail" nativeCard={ thumbnailCardBuilder.card } onImageLoad={ props.onImageLoad } onCardAction={ props.onCardAction } onClick={ onCardAction(attachment.content.tap) } />
+                <AdaptiveCardContainer className="thumbnail" nativeCard={thumbnailCardBuilder.card} onImageLoad={props.onImageLoad} onCardAction={props.onCardAction} onClick={onCardAction(attachment.content.tap)} />
             );
 
         case "application/vnd.microsoft.card.video":
             if (!attachment.content || !attachment.content.media || attachment.content.media.length === 0)
                 return null;
             return (
-                <AdaptiveCardContainer className="video" nativeCard={ CardBuilder.buildCommonCard(attachment.content) } onCardAction={ props.onCardAction } >
+                <AdaptiveCardContainer className="video" nativeCard={CardBuilder.buildCommonCard(attachment.content)} onCardAction={props.onCardAction} >
                     {getRichCardContentMedia('video', attachment.content)}
                 </AdaptiveCardContainer>
             );
@@ -239,7 +239,7 @@ export const AttachmentView = (props: {
             if (!attachment.content || !attachment.content.media || attachment.content.media.length === 0)
                 return null;
             return (
-                <AdaptiveCardContainer className="animation" nativeCard={ CardBuilder.buildCommonCard(attachment.content) } onCardAction={ props.onCardAction } >
+                <AdaptiveCardContainer className="animation" nativeCard={CardBuilder.buildCommonCard(attachment.content)} onCardAction={props.onCardAction} >
                     {getRichCardContentMedia(mediaType, attachment.content)}
                 </AdaptiveCardContainer>
             );
@@ -257,14 +257,14 @@ export const AttachmentView = (props: {
             if (!attachment.content)
                 return null;
             return (
-                <AdaptiveCardContainer className="signin" nativeCard={ CardBuilder.buildCommonCard(attachment.content) } onCardAction={ props.onCardAction } />
+                <AdaptiveCardContainer className="signin" nativeCard={CardBuilder.buildCommonCard(attachment.content)} onCardAction={props.onCardAction} />
             );
 
         case "application/vnd.microsoft.card.oauth":
             if (!attachment.content)
                 return null;
             return (
-                <AdaptiveCardContainer className="signin" nativeCard={ CardBuilder.buildOAuthCard(attachment.content) } onCardAction={ props.onCardAction } />
+                <AdaptiveCardContainer className="signin" nativeCard={CardBuilder.buildOAuthCard(attachment.content)} onCardAction={props.onCardAction} />
             );
 
         case "application/vnd.microsoft.card.receipt":
@@ -308,14 +308,14 @@ export const AttachmentView = (props: {
             }
             receiptCardBuilder.addButtons(attachment.content.buttons);
             return (
-                <AdaptiveCardContainer className='receipt' nativeCard={ receiptCardBuilder.card } onCardAction={ props.onCardAction } onClick={ onCardAction(attachment.content.tap) } />
+                <AdaptiveCardContainer className='receipt' nativeCard={receiptCardBuilder.card} onCardAction={props.onCardAction} onClick={onCardAction(attachment.content.tap)} />
             );
 
         case "application/vnd.microsoft.card.adaptive":
             if (!attachment.content)
                 return null;
             return (
-                <AdaptiveCardContainer jsonCard={ attachment.content as IAdaptiveCard } onImageLoad={ props.onImageLoad } onCardAction={ props.onCardAction } />
+                <AdaptiveCardContainer jsonCard={attachment.content as IAdaptiveCard} onImageLoad={props.onImageLoad} onCardAction={props.onCardAction} />
             );
 
         // Deprecated format for Skype channels. For testing legacy bots in Emulator only.
@@ -323,8 +323,8 @@ export const AttachmentView = (props: {
             if (!attachment.content)
                 return null;
             return (
-                <AdaptiveCardContainer className="flex" nativeCard={ CardBuilder.buildCommonCard(attachment.content) } onCardAction={ props.onCardAction } >
-                    { attachedImage(attachment.content.images) }
+                <AdaptiveCardContainer className="flex" nativeCard={CardBuilder.buildCommonCard(attachment.content)} onCardAction={props.onCardAction} >
+                    {attachedImage(attachment.content.images)}
                 </AdaptiveCardContainer>
             );
 
@@ -333,17 +333,17 @@ export const AttachmentView = (props: {
         case "image/jpg":
         case "image/jpeg":
         case "image/gif":
-            return <Media src={ attachment.contentUrl } onLoad={ props.onImageLoad } />;
+            return <Media src={attachment.contentUrl} onLoad={props.onImageLoad} />;
 
         case "audio/mpeg":
         case "audio/mp4":
-            return <Media type='audio' src={ attachment.contentUrl } />;
+            return <Media type='audio' src={attachment.contentUrl} />;
 
         case "video/mp4":
-            return <Media type='video' poster={ attachment.thumbnailUrl } src={ attachment.contentUrl } onLoad={ props.onImageLoad } />;
+            return <Media type='video' poster={attachment.thumbnailUrl} src={attachment.contentUrl} onLoad={props.onImageLoad} />;
 
         default:
             var unknownAttachment = props.attachment as UnknownMedia;
-            return <Unknown format={ props.format } contentType={ unknownAttachment.contentType } contentUrl={ unknownAttachment.contentUrl } name={ unknownAttachment.name } />;
+            return <Unknown format={props.format} contentType={unknownAttachment.contentType} contentUrl={unknownAttachment.contentUrl} name={unknownAttachment.name} />;
     }
 }

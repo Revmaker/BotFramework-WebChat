@@ -23,7 +23,7 @@ export const FormattedText = (props: IFormattedTextProps) => {
 }
 
 const renderPlainText = (text: string) => {
-    const lines = text.replace('\r', '').split('\n');
+    const lines = text.replace(new RegExp('\r'), '').split('\n');
     const elements = lines.map((line, i) => <span key={i}>{line}<br /></span>);
     return <span className="format-plain">{elements}</span>;
 }
@@ -60,10 +60,10 @@ const renderMarkdown = (
 
     if (text.trim()) {
         const src = text
-          // convert <br> tags to blank lines for markdown
-          .replace(/<br\s*\/?>/ig, '\n')
-          // URL encode all links
-          .replace(/\[(.*?)\]\((.*?)( +".*?"){0,1}\)/ig, (match, text, url, title) => `[${text}](${markdownIt.normalizeLink(url)}${title === undefined ? '' : title})`);
+            // convert <br> tags to blank lines for markdown
+            .replace(new RegExp(/<br\s*\/?>/ig), '\n')
+            // URL encode all links
+            .replace(new RegExp(/\[(.*?)\]\((.*?)( +".*?"){0,1}\)/ig), (match, text, url, title) => `[${text}](${markdownIt.normalizeLink(url)}${title === undefined ? '' : title})`);
 
         const arr = src.split(/\n *\n|\r\n *\r\n|\r *\r/);
         const ma = arr.map(a => markdownIt.render(a));
@@ -71,7 +71,7 @@ const renderMarkdown = (
         __html = ma.join('<br/>');
     } else {
         // Replace spaces with non-breaking space Unicode characters
-        __html = text.replace(/ */, '\u00A0');
+        __html = text.replace(new RegExp(/ */), '\u00A0');
     }
 
     const heroCard: HeroCard = {
@@ -82,6 +82,6 @@ const renderMarkdown = (
     };
 
     return (
-        <MessageRenderer {...heroCard} onImageLoad={onImageLoad}/>
+        <MessageRenderer {...heroCard} onImageLoad={onImageLoad} />
     );
 };

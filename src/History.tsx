@@ -93,21 +93,21 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
     private measurableCarousel = () =>
         // find the largest possible message size by forcing a width larger than the chat itself
         <WrappedActivity
-            ref={ x => this.carouselActivity = x }
-            activity={ {
+            ref={x => this.carouselActivity = x}
+            activity={{
                 type: 'message',
                 id: '',
                 from: { id: '' },
                 attachmentLayout: 'carousel'
-            } }
-            format={ null }
-            fromMe={ false }
-            onClickActivity={ null }
-            onClickRetry={ null }
-            selected={ false }
-            showTimestamp={ false }
+            }}
+            format={null}
+            fromMe={false}
+            onClickActivity={null}
+            onClickRetry={null}
+            selected={false}
+            showTimestamp={false}
         >
-            <div style={ { width: this.largeWidth } }>&nbsp;</div>
+            <div style={{ width: this.largeWidth }}>&nbsp;</div>
         </WrappedActivity>;
 
     // At startup we do three render passes:
@@ -128,34 +128,34 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
             if (this.props.format.carouselMargin === undefined) {
                 // For measuring carousels we need a width known to be larger than the chat itself
                 this.largeWidth = this.props.size.width * 2;
-                content = <this.measurableCarousel/>;
+                content = <this.measurableCarousel />;
             } else {
                 content = this.props.activities.map((activity, index) =>
                     (activity.type !== 'message' || activity.text || (activity.attachments && activity.attachments.length)) &&
-                        <WrappedActivity
-                            format={ this.props.format }
-                            key={ 'message' + index }
-                            activity={ activity }
-                            showTimestamp={ index === this.props.activities.length - 1 || (index + 1 < this.props.activities.length && suitableInterval(activity, this.props.activities[index + 1])) }
-                            selected={ this.props.isSelected(activity) }
-                            fromMe={ this.props.isFromMe(activity) }
-                            onClickActivity={ this.props.onClickActivity(activity) }
-                            onClickRetry={ e => {
-                                // Since this is a click on an anchor, we need to stop it
-                                // from trying to actually follow a (nonexistant) link
-                                e.preventDefault();
-                                e.stopPropagation();
-                                this.props.onClickRetry(activity)
-                            } }
-                        >
-                            <ActivityView
-                                format={ this.props.format }
-                                size={ this.props.size }
-                                activity={ activity }
-                                onCardAction={ (type: CardActionTypes, value: string | object, buttonTitle?: string) => this.doCardAction(type, value, buttonTitle) }
-                                onImageLoad={ () => this.autoscroll() }
-                            />
-                        </WrappedActivity>
+                    <WrappedActivity
+                        format={this.props.format}
+                        key={'message' + index}
+                        activity={activity}
+                        showTimestamp={index === this.props.activities.length - 1 || (index + 1 < this.props.activities.length && suitableInterval(activity, this.props.activities[index + 1]))}
+                        selected={this.props.isSelected(activity)}
+                        fromMe={this.props.isFromMe(activity)}
+                        onClickActivity={this.props.onClickActivity(activity)}
+                        onClickRetry={e => {
+                            // Since this is a click on an anchor, we need to stop it
+                            // from trying to actually follow a (nonexistant) link
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.props.onClickRetry(activity)
+                        }}
+                    >
+                        <ActivityView
+                            format={this.props.format}
+                            size={this.props.size}
+                            activity={activity}
+                            onCardAction={(type: CardActionTypes, value: string | object, buttonTitle?: string) => this.doCardAction(type, value, buttonTitle)}
+                            onImageLoad={() => this.autoscroll()}
+                        />
+                    </WrappedActivity>
                 );
             }
         }
@@ -164,13 +164,13 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
 
         return (
             <div
-                className={ groupsClassName }
-                ref={ div => this.scrollMe = div || this.scrollMe }
+                className={groupsClassName}
+                ref={div => this.scrollMe = div || this.scrollMe}
                 role="log"
-                tabIndex={ 0 }
+                tabIndex={0}
             >
-                <div className="wc-message-group-content" ref={ div => { if (div) this.scrollContent = div }}>
-                    { content }
+                <div className="wc-message-group-content" ref={div => { if (div) this.scrollContent = div }}>
+                    {content}
                 </div>
             </div>
         );
@@ -190,32 +190,32 @@ export const History = connect(
         botConnection: state.connection.botConnection,
         user: state.connection.user
     }), {
-        setMeasurements: (carouselMargin: number) => ({ type: 'Set_Measurements', carouselMargin }),
-        onClickRetry: (activity: Activity) => ({ type: 'Send_Message_Retry', clientActivityId: activity.channelData.clientActivityId }),
-        onClickCardAction: () => ({ type: 'Card_Action_Clicked'}),
-        // only used to create helper functions below
-        sendMessage,
-        sendPostBack,
-        addMessage
-    }, (stateProps: any, dispatchProps: any, ownProps: any): HistoryProps => ({
-        // from stateProps
-        format: stateProps.format,
-        size: stateProps.size,
-        activities: stateProps.activities,
-        hasActivityWithSuggestedActions: stateProps.hasActivityWithSuggestedActions,
-        // from dispatchProps
-        setMeasurements: dispatchProps.setMeasurements,
-        onClickRetry: dispatchProps.onClickRetry,
-        onClickCardAction: dispatchProps.onClickCardAction,
-        // helper functions
-        doCardAction: doCardAction(stateProps.user, stateProps.format.locale, dispatchProps.sendMessage, dispatchProps.sendPostBack, dispatchProps.addMessage),
-        isFromMe: (activity: Activity) => activity.from.id === stateProps.user.id,
-        isSelected: (activity: Activity) => activity === stateProps.selectedActivity,
-        onClickActivity: (activity: Activity) => stateProps.connectionSelectedActivity && (() => stateProps.connectionSelectedActivity.next({ activity })),
-        onCardAction: ownProps.onCardAction
-    }), {
-        withRef: true
-    }
+    setMeasurements: (carouselMargin: number) => ({ type: 'Set_Measurements', carouselMargin }),
+    onClickRetry: (activity: Activity) => ({ type: 'Send_Message_Retry', clientActivityId: activity.channelData.clientActivityId }),
+    onClickCardAction: () => ({ type: 'Card_Action_Clicked' }),
+    // only used to create helper functions below
+    sendMessage,
+    sendPostBack,
+    addMessage
+}, (stateProps: any, dispatchProps: any, ownProps: any): HistoryProps => ({
+    // from stateProps
+    format: stateProps.format,
+    size: stateProps.size,
+    activities: stateProps.activities,
+    hasActivityWithSuggestedActions: stateProps.hasActivityWithSuggestedActions,
+    // from dispatchProps
+    setMeasurements: dispatchProps.setMeasurements,
+    onClickRetry: dispatchProps.onClickRetry,
+    onClickCardAction: dispatchProps.onClickCardAction,
+    // helper functions
+    doCardAction: doCardAction(stateProps.user, stateProps.format.locale, dispatchProps.sendMessage, dispatchProps.sendPostBack, dispatchProps.addMessage),
+    isFromMe: (activity: Activity) => activity.from.id === stateProps.user.id,
+    isSelected: (activity: Activity) => activity === stateProps.selectedActivity,
+    onClickActivity: (activity: Activity) => stateProps.connectionSelectedActivity && (() => stateProps.connectionSelectedActivity.next({ activity })),
+    onCardAction: ownProps.onCardAction
+}), {
+    withRef: true
+}
 )(HistoryView);
 
 const getComputedStyleValues = (el: HTMLElement, stylePropertyNames: string[]) => {
@@ -257,28 +257,28 @@ export class WrappedActivity extends React.Component<WrappedActivityProps, {}> {
         super(props);
     }
 
-    render () {
+    render() {
         let timeLine: JSX.Element;
         switch (this.props.activity.id) {
             case undefined:
-                timeLine = <span>{ this.props.format.strings.messageSending }</span>;
+                timeLine = <span>{this.props.format.strings.messageSending}</span>;
                 break;
             case null:
-                timeLine = <span>{ this.props.format.strings.messageFailed }</span>;
+                timeLine = <span>{this.props.format.strings.messageFailed}</span>;
                 break;
             case "retry":
                 timeLine =
                     <span>
-                        { this.props.format.strings.messageFailed }
-                        { ' ' }
-                        <a href="." onClick={ this.props.onClickRetry }>{ this.props.format.strings.messageRetry }</a>
+                        {this.props.format.strings.messageFailed}
+                        {' '}
+                        <a href="." onClick={this.props.onClickRetry}>{this.props.format.strings.messageRetry}</a>
                     </span>;
                 break;
             default:
                 let sent: string;
                 if (this.props.showTimestamp)
-                    sent = this.props.format.strings.timeSent.replace('%1', (new Date(this.props.activity.timestamp)).toLocaleTimeString());
-                timeLine = <span>{ this.props.activity.from.name || this.props.activity.from.id }{ sent }</span>;
+                    sent = this.props.format.strings.timeSent.replace(new RegExp('%1'), (new Date(this.props.activity.timestamp)).toLocaleTimeString());
+                timeLine = <span>{this.props.activity.from.name || this.props.activity.from.id}{sent}</span>;
                 break;
         }
 
@@ -296,17 +296,17 @@ export class WrappedActivity extends React.Component<WrappedActivityProps, {}> {
         );
 
         return (
-            <div data-activity-id={ this.props.activity.id } className={ wrapperClassName } onClick={ this.props.onClickActivity }>
-                <div className={ 'wc-message wc-message-from-' + who } ref={ div => this.messageDiv = div }>
-                    <div className={ contentClassName }>
+            <div data-activity-id={this.props.activity.id} className={wrapperClassName} onClick={this.props.onClickActivity}>
+                <div className={'wc-message wc-message-from-' + who} ref={div => this.messageDiv = div}>
+                    <div className={contentClassName}>
                         <svg className="wc-message-callout">
                             <path className="point-left" d="m0,6 l6 6 v-12 z" />
                             <path className="point-right" d="m6,6 l-6 6 v-12 z" />
                         </svg>
-                        { this.props.children }
+                        {this.props.children}
                     </div>
                 </div>
-                <div className={ 'wc-message-from wc-message-from-' + who }>{ timeLine }</div>
+                <div className={'wc-message-from wc-message-from-' + who}>{timeLine}</div>
             </div>
         );
     }
