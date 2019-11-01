@@ -277,7 +277,7 @@ export class WrappedActivity extends React.Component<WrappedActivityProps, {}> {
             default:
                 let sent: string;
                 if (this.props.showTimestamp)
-                    sent = this.props.format.strings.timeSent.replace(new RegExp('%1'), (new Date(this.props.activity.timestamp)).toLocaleTimeString());
+                    sent = this.props.format.strings.timeSent.replace('%1', (new Date(this.props.activity.timestamp)).toLocaleTimeString());
                 timeLine = <span>{this.props.activity.from.name || this.props.activity.from.id}{sent}</span>;
                 break;
         }
