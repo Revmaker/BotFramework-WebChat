@@ -20,7 +20,6 @@ export interface ChatProps {
     chatTitle?: boolean | string,
     vendorId: string,
     secret: string,
-    customData: object,
     buttonClickCallback: (payload: object) => void,
     user: User,
     bot: User,
@@ -172,7 +171,7 @@ export class Chat extends React.Component<ChatProps, {}> {
     }
 
     componentDidMount() {
-        const { buttonClickCallback, cmsUrl, customData } = this.props;
+        const { buttonClickCallback, cmsUrl } = this.props;
 
         // Now that we're mounted, we know our dimensions. Put them in the store (this will force a re-render)
         this.setSize();
@@ -183,10 +182,6 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         if (cmsUrl) {
             window.CMS_URL = cmsUrl;
-        }
-
-        if (customData) {
-            window.customData = customData
         }
 
         // Configure directline options
@@ -326,12 +321,6 @@ export const doCardAction = (
             const payload = JSON.parse(text);
             if (payload.localResponse.route === undefined || payload.localResponse.route === null) {
                 throw new Error("Invalid route payload");
-            }
-
-            // If client supplied customData, send it in with the
-            // payload so we can do something with it in Shopbot
-            if (window.customData) {
-                JSON.parse(text).localResponse.customData = window.customData;
             }
 
             window.buttonClickCallback(payload);
