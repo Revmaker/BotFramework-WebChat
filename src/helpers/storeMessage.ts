@@ -18,20 +18,20 @@ const removePersonalData = (message: Activity) => {
   if (typeof newMessage.text === 'string') {
     // phone number
     newMessage.text =
-      newMessage.text.replace(
-        /(?:\d{1}\s)?\(?(\d{3})\)?-?\s?(\d{3})-?\s?(\d{4})/g,
+      newMessage.text.replace(new RegExp
+        (/(?:\d{1}\s)?\(?(\d{3})\)?-?\s?(\d{3})-?\s?(\d{4})/g),
         '[phone removed]');
 
     // email
     newMessage.text =
-      newMessage.text.replace(
-        /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/i,
+      newMessage.text.replace(new RegExp
+        (/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/i),
         '[email removed]');
 
     // vin number
     newMessage.text =
-      newMessage.text.replace(
-        /([A-HJ-NPR-Z\d]{3})([A-HJ-NPR-Z\d]{5})([\dX])(([A-HJ-NPR-Z\d])([A-HJ-NPR-Z\d])([A-HJ-NPR-Z\d]{6}))/i,
+      newMessage.text.replace(new RegExp
+        (/([A-HJ-NPR-Z\d]{3})([A-HJ-NPR-Z\d]{5})([\dX])(([A-HJ-NPR-Z\d])([A-HJ-NPR-Z\d])([A-HJ-NPR-Z\d]{6}))/i),
         '[vin removed]');
   }
 
@@ -39,17 +39,17 @@ const removePersonalData = (message: Activity) => {
 };
 
 export const getStoredMessages = () => {
-    try {
-      const storage = window.localStorage;
-      if (storage) {
-        const value = storage.getItem(MESSAGE_STORAGE_KEY) || '[]';
-        const messages = JSON.parse(value);
-        return messages;
-      }
-      return [];
-    } catch (e) {
-      return [];
+  try {
+    const storage = window.localStorage;
+    if (storage) {
+      const value = storage.getItem(MESSAGE_STORAGE_KEY) || '[]';
+      const messages = JSON.parse(value);
+      return messages;
     }
+    return [];
+  } catch (e) {
+    return [];
+  }
 }
 
 const storeMessage = (message: Activity) => {

@@ -32,10 +32,10 @@ export function initializeConnection(): ThunkInterface<Promise<{}>> {
             });
 
             const botConnection = Object.assign({}, directLine, {
-                postActivity: function(activity: Activity) {
+                postActivity: function (activity: Activity) {
                     return directLine.postActivity(Object.assign({}, activity, {
                         channelData: {
-                            vendorId 
+                            vendorId
                         }
                     }));
                 }
@@ -55,7 +55,7 @@ export function initializeConnection(): ThunkInterface<Promise<{}>> {
                     */
                     dispatch(connectionChange(connectionStatus));
 
-                    switch(connectionStatus) {
+                    switch (connectionStatus) {
                         case ConnectionStatus.ExpiredToken:
                         case ConnectionStatus.Ended:
                         case ConnectionStatus.Online:
@@ -106,13 +106,13 @@ export function sendMessage(text: string): ThunkInterface<Promise<{}>> {
         const { locale } = getState().format;
         const { connectionStatus, user } = getState().connection;
         return new Promise((resolve) => {
-            switch(connectionStatus) {
+            switch (connectionStatus) {
                 case ConnectionStatus.Uninitialized:
                     return dispatch(initializeConnection())
-                    .then(() => {
-                        dispatch(sendMessageSync(text, user, locale));
-                        resolve();
-                    });
+                        .then(() => {
+                            dispatch(sendMessageSync(text, user, locale));
+                            resolve();
+                        });
                 case ConnectionStatus.Online:
                     return dispatch(sendMessageSync(text, user, locale));
             }
@@ -125,25 +125,25 @@ export function sendPostBack(text: string, value: object): ThunkInterface<Promis
         const { locale } = getState().format;
         const { connectionStatus, user } = getState().connection;
         return new Promise((resolve) => {
-            switch(connectionStatus) {
+            switch (connectionStatus) {
                 case ConnectionStatus.Uninitialized:
                     return dispatch(initializeConnection())
-                    .then(() => {
-                        const { botConnection } = getState().connection;
-                        botConnection.postActivity({type: "message", text, value, from: user, locale })
+                        .then(() => {
+                            const { botConnection } = getState().connection;
+                            botConnection.postActivity({ type: "message", text, value, from: user, locale })
+                                .subscribe(
+                                    id => konsole.log("success sending postBack", id),
+                                    error => konsole.log("failed to send postBack", error)
+                                );
+                            resolve();
+                        });
+                case ConnectionStatus.Online:
+                    const { botConnection } = getState().connection;
+                    botConnection.postActivity({ type: "message", text, value, from: user, locale })
                         .subscribe(
                             id => konsole.log("success sending postBack", id),
                             error => konsole.log("failed to send postBack", error)
                         );
-                        resolve();
-                    });
-                case ConnectionStatus.Online:
-                    const { botConnection } = getState().connection;
-                    botConnection.postActivity({type: "message", text, value, from: user, locale })
-                    .subscribe(
-                        id => konsole.log("success sending postBack", id),
-                        error => konsole.log("failed to send postBack", error)
-                    );
                     resolve();
                     break;
             }
@@ -154,17 +154,17 @@ export function sendPostBack(text: string, value: object): ThunkInterface<Promis
 export const receiveSentMessage = (activity: Activity) => ({
     type: 'Receive_Sent_Message',
     activity,
-    } as ChatActions);
+} as ChatActions);
 
 export const receiveMessage = (activity: Activity) => ({
     type: 'Receive_Message',
     activity,
-    } as ChatActions);
+} as ChatActions);
 
 export const showTyping = (activity: Activity) => ({
     type: 'Show_Typing',
     activity,
-    } as ChatActions);
+} as ChatActions);
 
 export const startConnection = (user: User, bot: any, botConnection: any, selectedActivity: any) => ({
     type: 'Start_Connection',
@@ -172,12 +172,12 @@ export const startConnection = (user: User, bot: any, botConnection: any, select
     bot,
     botConnection,
     selectedActivity
-    } as ChatActions);
+} as ChatActions);
 
 export const connectionChange = (connectionStatus: ConnectionStatus) => ({
     type: 'Connection_Change',
     connectionStatus
-    } as ChatActions);
+} as ChatActions);
 
 const sendMessageSync = (text: string, from: User, locale: string) => ({
     type: 'Send_Message',
@@ -188,7 +188,8 @@ const sendMessageSync = (text: string, from: User, locale: string) => ({
         locale,
         textFormat: 'plain',
         timestamp: (new Date()).toISOString()
-    }} as ChatActions);
+    }
+} as ChatActions);
 
 export const addMessage = (text: string, from: User, locale: string) => ({
     type: 'Add_Message',
@@ -200,7 +201,8 @@ export const addMessage = (text: string, from: User, locale: string) => ({
         locale,
         textFormat: 'plain',
         timestamp: (new Date()).toISOString()
-    }} as ChatActions);
+    }
+} as ChatActions);
 
 export const sendFiles = (files: FileList, from: User, locale: string) => ({
     type: 'Send_Message',
@@ -209,7 +211,8 @@ export const sendFiles = (files: FileList, from: User, locale: string) => ({
         attachments: attachmentsFromFiles(files),
         from,
         locale
-    }} as ChatActions);
+    }
+} as ChatActions);
 
 const attachmentsFromFiles = (files: FileList) => {
     const attachments: Media[] = [];
@@ -228,7 +231,7 @@ export interface ShellState {
     sendTyping: boolean
     input: string
     listeningState: ListeningState
-    lastInputViaSpeech : boolean
+    lastInputViaSpeech: boolean
 }
 
 export type ShellAction = {
@@ -245,7 +248,7 @@ export type ShellAction = {
     type: 'Listening_Stop'
 } | {
     type: 'Stop_Speaking'
-} |  {
+} | {
     type: 'Card_Action_Clicked'
 } | {
     type: 'Set_Send_Typing',
@@ -253,7 +256,7 @@ export type ShellAction = {
 } | {
     type: 'Send_Message',
     activity: Activity
-}| {
+} | {
     type: 'Speak_SSML',
     ssml: string,
     locale: string
@@ -265,7 +268,7 @@ export const shell: Reducer<ShellState> = (
         input: '',
         sendTyping: false,
         listeningState: ListeningState.STOPPED,
-        lastInputViaSpeech : false
+        lastInputViaSpeech: false
     },
     action: ShellAction
 ) => {
@@ -274,7 +277,7 @@ export const shell: Reducer<ShellState> = (
             return {
                 ...state,
                 input: action.input,
-                lastInputViaSpeech : action.source == "speech"
+                lastInputViaSpeech: action.source == "speech"
             };
 
         case 'Listening_Start':
@@ -314,10 +317,10 @@ export const shell: Reducer<ShellState> = (
             };
 
         case 'Card_Action_Clicked':
-           return {
+            return {
                 ...state,
-                lastInputViaSpeech : false
-           };
+                lastInputViaSpeech: false
+            };
 
         default:
             return state;
@@ -404,7 +407,7 @@ export const size: Reducer<SizeState> = (
     switch (action.type) {
         case 'Set_Size':
             return {
-                ... state,
+                ...state,
                 width: action.width,
                 height: action.height
             };
@@ -455,15 +458,15 @@ export const connection: Reducer<ConnectionState> = (
     switch (action.type) {
         case 'Configure_DirectLine_Options':
             return {
-                ... state,
+                ...state,
                 user: action.user,
                 bot: action.bot,
-                secret: action.secret, 
+                secret: action.secret,
                 vendorId: action.vendorId
             }
         case 'Start_Connection':
             return {
-                ... state,
+                ...state,
                 botConnection: action.botConnection,
                 user: action.user,
                 bot: action.bot,
@@ -471,7 +474,7 @@ export const connection: Reducer<ConnectionState> = (
             };
         case 'Connection_Change':
             return {
-                ... state,
+                ...state,
                 connectionStatus: action.connectionStatus
             };
         default:
@@ -510,9 +513,9 @@ export type HistoryAction = MessageHistoryAction | {
 }
 
 const copyArrayWithUpdatedItem = <T>(array: Array<T>, i: number, item: T) => [
-    ... array.slice(0, i),
+    ...array.slice(0, i),
     item,
-    ... array.slice(i + 1)
+    ...array.slice(i + 1)
 ];
 
 export const history: Reducer<HistoryState> = (
@@ -537,7 +540,7 @@ export const history: Reducer<HistoryState> = (
             if (i !== -1) {
                 const activity = state.activities[i];
                 return {
-                    ... state,
+                    ...state,
                     activities: copyArrayWithUpdatedItem(state.activities, i, activity),
                     selectedActivity: state.selectedActivity === activity ? action.activity : state.selectedActivity
                 };
@@ -548,26 +551,26 @@ export const history: Reducer<HistoryState> = (
             if (state.activities.find(a => a.id === action.activity.id)) return state; // don't allow duplicate messages
 
             return {
-                ... state,
+                ...state,
                 activities: [
-                    ... state.activities.filter(activity => activity.type !== "typing"),
+                    ...state.activities.filter(activity => activity.type !== "typing"),
                     action.activity,
-                    ... state.activities.filter(activity => activity.from.id !== action.activity.from.id && activity.type === "typing"),
+                    ...state.activities.filter(activity => activity.from.id !== action.activity.from.id && activity.type === "typing"),
                 ]
             };
 
         case 'Add_Message':
         case 'Send_Message':
             return {
-                ... state,
+                ...state,
                 activities: [
-                    ... state.activities.filter(activity => activity.type !== "typing"),
+                    ...state.activities.filter(activity => activity.type !== "typing"),
                     {
-                        ... action.activity,
+                        ...action.activity,
                         timestamp: (new Date()).toISOString(),
                         channelData: { clientActivityId: state.clientActivityBase + state.clientActivityCounter }
                     },
-                    ... state.activities.filter(activity => activity.type === "typing"),
+                    ...state.activities.filter(activity => activity.type === "typing"),
                 ],
                 clientActivityCounter: state.clientActivityCounter + 1
             };
@@ -576,13 +579,13 @@ export const history: Reducer<HistoryState> = (
             const activity = state.activities.find(activity =>
                 activity.channelData && activity.channelData.clientActivityId === action.clientActivityId
             );
-            const newActivity = activity.id === undefined ? activity : { ... activity, id: undefined };
+            const newActivity = activity.id === undefined ? activity : { ...activity, id: undefined };
             return {
-                ... state,
+                ...state,
                 activities: [
-                    ... state.activities.filter(activityT => activityT.type !== "typing" && activityT !== activity),
+                    ...state.activities.filter(activityT => activityT.type !== "typing" && activityT !== activity),
                     newActivity,
-                    ... state.activities.filter(activity => activity.type === "typing")
+                    ...state.activities.filter(activity => activity.type === "typing")
                 ],
                 selectedActivity: state.selectedActivity === activity ? newActivity : state.selectedActivity
             };
@@ -598,11 +601,11 @@ export const history: Reducer<HistoryState> = (
             if (activity.id && activity.id != "retry") return state;
 
             const newActivity = {
-                ... activity,
+                ...activity,
                 id: action.type === 'Send_Message_Succeed' ? action.id : null
             };
             return {
-                ... state,
+                ...state,
                 activities: copyArrayWithUpdatedItem(state.activities, i, newActivity),
                 clientActivityCounter: state.clientActivityCounter + 1,
                 selectedActivity: state.selectedActivity === activity ? newActivity : state.selectedActivity
@@ -610,17 +613,17 @@ export const history: Reducer<HistoryState> = (
         }
         case 'Show_Typing':
             return {
-                ... state,
+                ...state,
                 activities: [
-                    ... state.activities.filter(activity => activity.type !== "typing"),
-                    ... state.activities.filter(activity => activity.from.id !== action.activity.from.id && activity.type === "typing"),
+                    ...state.activities.filter(activity => activity.type !== "typing"),
+                    ...state.activities.filter(activity => activity.from.id !== action.activity.from.id && activity.type === "typing"),
                     action.activity
                 ]
             };
 
         case 'Clear_Typing':
             return {
-                ... state,
+                ...state,
                 activities: state.activities.filter(activity => activity.id !== action.id),
                 selectedActivity: state.selectedActivity && state.selectedActivity.id === action.id ? null : state.selectedActivity
             };
@@ -628,7 +631,7 @@ export const history: Reducer<HistoryState> = (
         case 'Select_Activity':
             if (action.selectedActivity === state.selectedActivity) return state;
             return {
-                ... state,
+                ...state,
                 selectedActivity: action.selectedActivity
             };
 
@@ -636,11 +639,11 @@ export const history: Reducer<HistoryState> = (
             const i = state.activities.findIndex(activity => activity === action.message);
             const activity = state.activities[i];
             const newActivity = {
-                ... activity,
+                ...activity,
                 suggestedActions: undefined
             };
             return {
-                ... state,
+                ...state,
                 activities: copyArrayWithUpdatedItem(state.activities, i, newActivity),
                 selectedActivity: state.selectedActivity === activity ? newActivity : state.selectedActivity
             }
@@ -708,10 +711,10 @@ const speakFromMsg = (msg: Message, fallbackLocale: string) => {
         }
 
     return {
-            type : 'Speak_SSML',
-            ssml: speak,
-            locale: msg.locale || fallbackLocale,
-            autoListenAfterSpeak : (msg.inputHint == "expectingInput") || (msg.channelData && msg.channelData.botState == "WaitingForAnswerToQuestion"),
+        type: 'Speak_SSML',
+        ssml: speak,
+        locale: msg.locale || fallbackLocale,
+        autoListenAfterSpeak: (msg.inputHint == "expectingInput") || (msg.channelData && msg.channelData.botState == "WaitingForAnswerToQuestion"),
     }
 }
 
@@ -738,64 +741,64 @@ import 'rxjs/add/observable/of';
 
 const sendMessageEpic: Epic<ChatActions, ChatState> = (action$, store) =>
     action$.ofType('Send_Message')
-    .map(action => {
-        const state = store.getState();
-        const clientActivityId = state.history.clientActivityBase + (state.history.clientActivityCounter - 1);
-        return ({ type: 'Send_Message_Try', clientActivityId } as HistoryAction);
-    });
+        .map(action => {
+            const state = store.getState();
+            const clientActivityId = state.history.clientActivityBase + (state.history.clientActivityCounter - 1);
+            return ({ type: 'Send_Message_Try', clientActivityId } as HistoryAction);
+        });
 
 const trySendMessageEpic: Epic<ChatActions, ChatState> = (action$, store) =>
     action$.ofType('Send_Message_Try')
-    .flatMap(action => {
-        const state = store.getState();
+        .flatMap(action => {
+            const state = store.getState();
 
-        const clientActivityId = action.clientActivityId;
-        const activity = state.history.activities.find(activity => activity.channelData && activity.channelData.clientActivityId === clientActivityId);
-        if (!activity) {
-            konsole.log("trySendMessage: activity not found");
-            return Observable.empty<HistoryAction>();
-        }
+            const clientActivityId = action.clientActivityId;
+            const activity = state.history.activities.find(activity => activity.channelData && activity.channelData.clientActivityId === clientActivityId);
+            if (!activity) {
+                konsole.log("trySendMessage: activity not found");
+                return Observable.empty<HistoryAction>();
+            }
 
-        if (state.history.clientActivityCounter == 1) {
-            var capabilities = {
-                type : 'ClientCapabilities',
-                requiresBotState: true,
-                supportsTts: true,
-                supportsListening: true,
-                // Todo: consider implementing acknowledgesTts: true
-            };
-            (<any>activity).entities  =(<any>activity).entities == null ? [capabilities] :  [...(<any>activity).entities, capabilities];
-        }
+            if (state.history.clientActivityCounter == 1) {
+                var capabilities = {
+                    type: 'ClientCapabilities',
+                    requiresBotState: true,
+                    supportsTts: true,
+                    supportsListening: true,
+                    // Todo: consider implementing acknowledgesTts: true
+                };
+                (<any>activity).entities = (<any>activity).entities == null ? [capabilities] : [...(<any>activity).entities, capabilities];
+            }
 
-        return state.connection.botConnection.postActivity(activity)
-        .map(id => ({ type: 'Send_Message_Succeed', clientActivityId, id } as HistoryAction))
-        .catch(error => Observable.of({ type: 'Send_Message_Fail', clientActivityId } as HistoryAction))
-    });
+            return state.connection.botConnection.postActivity(activity)
+                .map(id => ({ type: 'Send_Message_Succeed', clientActivityId, id } as HistoryAction))
+                .catch(error => Observable.of({ type: 'Send_Message_Fail', clientActivityId } as HistoryAction))
+        });
 
 const speakObservable = Observable.bindCallback<string, string, {}, {}>(Speech.SpeechSynthesizer.speak);
 
 const speakSSMLEpic: Epic<ChatActions, ChatState> = (action$, store) =>
     action$.ofType('Speak_SSML')
-    .filter(action => action.ssml )
-    .mergeMap(action => {
+        .filter(action => action.ssml)
+        .mergeMap(action => {
 
-        var onSpeakingStarted =  null;
-        var onSpeakingFinished = () => nullAction;
-        if(action.autoListenAfterSpeak) {
-            onSpeakingStarted = () => Speech.SpeechRecognizer.warmup() ;
-            onSpeakingFinished = () => ({ type: 'Listening_Starting' } as ShellAction);
-        }
+            var onSpeakingStarted = null;
+            var onSpeakingFinished = () => nullAction;
+            if (action.autoListenAfterSpeak) {
+                onSpeakingStarted = () => Speech.SpeechRecognizer.warmup();
+                onSpeakingFinished = () => ({ type: 'Listening_Starting' } as ShellAction);
+            }
 
-        const call$ = speakObservable(action.ssml, action.locale, onSpeakingStarted);
-        return call$.map(onSpeakingFinished)
-            .catch(error => Observable.of(nullAction));
-    })
-    .merge(action$.ofType('Speak_SSML').map(_ => ({ type: 'Listening_Stopping' } as ShellAction)));
+            const call$ = speakObservable(action.ssml, action.locale, onSpeakingStarted);
+            return call$.map(onSpeakingFinished)
+                .catch(error => Observable.of(nullAction));
+        })
+        .merge(action$.ofType('Speak_SSML').map(_ => ({ type: 'Listening_Stopping' } as ShellAction)));
 
 const speakOnMessageReceivedEpic: Epic<ChatActions, ChatState> = (action$, store) =>
     action$.ofType('Receive_Message')
-    .filter(action => (action.activity as Message) && store.getState().shell.lastInputViaSpeech)
-    .map(action => speakFromMsg(action.activity as Message, store.getState().format.locale) as ShellAction);
+        .filter(action => (action.activity as Message) && store.getState().shell.lastInputViaSpeech)
+        .map(action => speakFromMsg(action.activity as Message, store.getState().format.locale) as ShellAction);
 
 const stopSpeakingEpic: Epic<ChatActions, ChatState> = (action$) =>
     action$.ofType(
@@ -805,62 +808,61 @@ const stopSpeakingEpic: Epic<ChatActions, ChatState> = (action$) =>
         'Card_Action_Clicked',
         'Stop_Speaking'
     )
-    .do(Speech.SpeechSynthesizer.stopSpeaking)
-    .map(_ => nullAction)
+        .do(Speech.SpeechSynthesizer.stopSpeaking)
+        .map(_ => nullAction)
 
 const stopListeningEpic: Epic<ChatActions, ChatState> = (action$, store) =>
     action$.ofType(
         'Listening_Stopping',
         'Card_Action_Clicked'
     )
-    .do(async () => {
-        await Speech.SpeechRecognizer.stopRecognizing()
+        .do(async () => {
+            await Speech.SpeechRecognizer.stopRecognizing()
 
-        store.dispatch({ type: 'Listening_Stop' });
-    })
-    .map(_ => nullAction);
+            store.dispatch({ type: 'Listening_Stop' });
+        })
+        .map(_ => nullAction);
 
 const startListeningEpic: Epic<ChatActions, ChatState> = (action$, store) =>
     action$.ofType('Listening_Starting')
-    .do(async (action : ShellAction) => {
-        const { history: { activities }, format: { locale } } = store.getState();
-        const lastMessageActivity = [...activities].reverse().find(activity => activity.type === 'message');
-        // TODO: Bump DirectLineJS version to support "listenFor" grammars
-        const grammars: string[] = lastMessageActivity && (lastMessageActivity as any).listenFor;
-        const onIntermediateResult = (srText : string) => { store.dispatch({ type: 'Update_Input', input: srText, source: 'speech' })};
-        const onFinalResult = (srText : string) => {
-            srText = srText.replace(/^[.\s]+|[.\s]+$/g, "");
-            onIntermediateResult(srText);
-            store.dispatch({ type: 'Listening_Stopping' });
-            store.dispatch(sendMessageSync(srText, store.getState().connection.user, locale));
-        };
-        const onAudioStreamStart = () => { store.dispatch({ type: 'Listening_Start' }) };
-        const onRecognitionFailed = () => { store.dispatch({ type: 'Listening_Stopping' })};
+        .do(async (action: ShellAction) => {
+            const { history: { activities }, format: { locale } } = store.getState();
+            const lastMessageActivity = [...activities].reverse().find(activity => activity.type === 'message');
+            // TODO: Bump DirectLineJS version to support "listenFor" grammars
+            const grammars: string[] = lastMessageActivity && (lastMessageActivity as any).listenFor;
+            const onIntermediateResult = (srText: string) => { store.dispatch({ type: 'Update_Input', input: srText, source: 'speech' }) };
+            const onFinalResult = (srText: string) => {
+                srText = srText.replace(new RegExp(/^[.\s]+|[.\s]+$/g), "");
+                onIntermediateResult(srText);
+                store.dispatch({ type: 'Listening_Stopping' });
+                store.dispatch(sendMessageSync(srText, store.getState().connection.user, locale));
+            };
+            const onAudioStreamStart = () => { store.dispatch({ type: 'Listening_Start' }) };
+            const onRecognitionFailed = () => { store.dispatch({ type: 'Listening_Stopping' }) };
 
-        await Speech.SpeechRecognizer.startRecognizing(
-            locale,
-            grammars,
-            onIntermediateResult,
-            onFinalResult,
-            onAudioStreamStart,
-            onRecognitionFailed
-        );
-    })
-    .map(_ => nullAction)
+            await Speech.SpeechRecognizer.startRecognizing(
+                locale,
+                grammars,
+                onIntermediateResult,
+                onFinalResult,
+                onAudioStreamStart,
+                onRecognitionFailed
+            );
+        })
+        .map(_ => nullAction)
 
-const listeningSilenceTimeoutEpic: Epic<ChatActions, ChatState> = (action$, store) =>
-{
+const listeningSilenceTimeoutEpic: Epic<ChatActions, ChatState> = (action$, store) => {
     const cancelMessages$ = action$.ofType('Update_Input', 'Listening_Stopping');
     return action$.ofType('Listening_Start')
         .mergeMap((action) =>
             Observable.of(({ type: 'Listening_Stopping' }) as ShellAction)
-            .delay(5000)
-            .takeUntil(cancelMessages$));
+                .delay(5000)
+                .takeUntil(cancelMessages$));
 };
 
 const retrySendMessageEpic: Epic<ChatActions, ChatState> = (action$) =>
     action$.ofType('Send_Message_Retry')
-    .map(action => ({ type: 'Send_Message_Try', clientActivityId: action.clientActivityId } as HistoryAction));
+        .map(action => ({ type: 'Send_Message_Try', clientActivityId: action.clientActivityId } as HistoryAction));
 
 const updateSelectedActivityEpic: Epic<ChatActions, ChatState> = (action$, store) =>
     action$.ofType(
@@ -869,39 +871,39 @@ const updateSelectedActivityEpic: Epic<ChatActions, ChatState> = (action$, store
         'Show_Typing',
         'Clear_Typing'
     )
-    .map(action => {
-        const state = store.getState();
-        if (state.connection.selectedActivity)
-            state.connection.selectedActivity.next({ activity: state.history.selectedActivity });
-        return nullAction;
-    });
+        .map(action => {
+            const state = store.getState();
+            if (state.connection.selectedActivity)
+                state.connection.selectedActivity.next({ activity: state.history.selectedActivity });
+            return nullAction;
+        });
 
 const showTypingEpic: Epic<ChatActions, ChatState> = (action$) =>
     action$.ofType('Show_Typing')
-    .delay(3000)
-    .map(action => ({ type: 'Clear_Typing', id: action.activity.id } as HistoryAction));
+        .delay(3000)
+        .map(action => ({ type: 'Clear_Typing', id: action.activity.id } as HistoryAction));
 
 const sendTypingEpic: Epic<ChatActions, ChatState> = (action$, store) =>
     action$.ofType('Update_Input')
-    .map(_ => store.getState())
-    .filter(state => state.shell.sendTyping)
-    .throttleTime(3000)
-    .do(_ => konsole.log("sending typing"))
-    .flatMap(state =>
-        state.connection.botConnection.postActivity({
-            type: 'typing',
-            from: state.connection.user
-        })
-        .map(_ => nullAction)
-        .catch(error => Observable.of(nullAction))
-    );
+        .map(_ => store.getState())
+        .filter(state => state.shell.sendTyping)
+        .throttleTime(3000)
+        .do(_ => konsole.log("sending typing"))
+        .flatMap(state =>
+            state.connection.botConnection.postActivity({
+                type: 'typing',
+                from: state.connection.user
+            })
+                .map(_ => nullAction)
+                .catch(error => Observable.of(nullAction))
+        );
 
 const storeMessageEpic: Epic<ChatActions, ChatState> = (action$) =>
     action$.ofType('Receive_Message', 'Send_Message')
-    .map((action: MessageHistoryAction) => {
-        storeMessage(action.activity);
-        return nullAction;
-    });
+        .map((action: MessageHistoryAction) => {
+            storeMessage(action.activity);
+            return nullAction;
+        });
 
 // Now we put it all together into a store with middleware
 
