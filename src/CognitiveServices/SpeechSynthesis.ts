@@ -269,11 +269,11 @@ class CognitiveServicesHelper {
     }
 
     private encodeHTML(text: string): string {
-        return text.replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&apos;');
+        return text.replace(new RegExp(/&/g), '&amp;')
+            .replace(new RegExp(/</g), '&lt;')
+            .replace(new RegExp(/>/g), '&gt;')
+            .replace(new RegExp(/"/g), '&quot;')
+            .replace(new RegExp(/'/g), '&apos;');
     }
 
     private fetchSpeechToken(apiKey: string): Promise<string> {

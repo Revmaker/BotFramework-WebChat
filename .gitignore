@@ -29,4 +29,5 @@ CognitiveServices.js.map
 .env
 
 !samples/release/iframe.css
+samples/.DS_Store
 .DS_Store

@@ -171,15 +171,17 @@ export class Chat extends React.Component<ChatProps, {}> {
     }
 
     componentDidMount() {
+        const { buttonClickCallback, cmsUrl } = this.props;
+
         // Now that we're mounted, we know our dimensions. Put them in the store (this will force a re-render)
         this.setSize();
 
-        if (this.props.buttonClickCallback) {
-            window.buttonClickCallback = this.props.buttonClickCallback;
+        if (buttonClickCallback) {
+            window.buttonClickCallback = buttonClickCallback;
         }
 
-        if (this.props.cmsUrl) {
-            window.CMS_URL = this.props.cmsUrl;
+        if (cmsUrl) {
+            window.CMS_URL = cmsUrl;
         }
 
         // Configure directline options
