@@ -145,27 +145,29 @@ export class HScroll extends React.Component<HScrollProps, {}> {
             <div>
                 <button
                     className="scroll previous"
+                    aria-label="previous"
                     disabled
-                    ref={ button => this.prevButton = button }
+                    ref={button => this.prevButton = button}
                     type="button"
                 >
                     <svg>
-                        <path d={ this.props.prevSvgPathData }/>
+                        <path d={this.props.prevSvgPathData} />
                     </svg>
                 </button>
                 <div className="wc-hscroll-outer">
-                    <div className="wc-hscroll" ref={ div => this.scrollDiv = div }>
-                        { this.props.children }
+                    <div className="wc-hscroll" ref={div => this.scrollDiv = div}>
+                        {this.props.children}
                     </div>
                 </div>
                 <button
                     className="scroll next"
+                    aria-label="next"
                     disabled
-                    ref={ button => this.nextButton = button }
+                    ref={button => this.nextButton = button}
                     type="button"
                 >
                     <svg>
-                        <path d={ this.props.nextSvgPathData }/>
+                        <path d={this.props.nextSvgPathData} />
                     </svg>
                 </button>
             </div >
