@@ -190,7 +190,7 @@ export class Chat extends React.Component<ChatProps, {}> {
         const sessionStorageUserData = JSON.parse(sessionStorage.getItem('User_Data'));
         if (sessionStorageUserData && sessionStorageUserData.firstName) { // Only proceed if first name exists
             const { firstName, lastName } = sessionStorageUserData;
-            let clientUserName = lastName ? `${firstName} ${lastName}` : firstName;
+            const clientUserName = lastName ? `${firstName} ${lastName}` : firstName;
             updatedUser = Object.assign({}, this.props.user);
             updatedUser.name = clientUserName;
         }
