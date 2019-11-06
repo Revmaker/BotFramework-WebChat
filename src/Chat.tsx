@@ -184,23 +184,17 @@ export class Chat extends React.Component<ChatProps, {}> {
             window.CMS_URL = cmsUrl;
         }
 
-        // Fetch first and last name from session
-        // storage if it exists.
-        let user = { ...this.props.user };
+        // Get session data if it exists
         const sessionStorageUserData = JSON.parse(sessionStorage.getItem('User_Data'));
-        if (sessionStorageUserData && sessionStorageUserData.firstName) { // Only proceed if first name exists
-            const { firstName, lastName } = sessionStorageUserData;
-            const clientUserName = lastName ? `${firstName} ${lastName}` : firstName;
-            user.name = clientUserName;
-        }
 
         // Configure directline options
         this.store.dispatch<ChatActions>({
             type: "Configure_DirectLine_Options",
-            user,
+            user: this.props.user,
             bot: this.props.bot,
             secret: this.props.secret,
-            vendorId: this.props.vendorId
+            vendorId: this.props.vendorId,
+            clientSessionData: sessionStorageUserData
         });
 
         const storedMessages = getStoredMessages();

@@ -441,6 +441,7 @@ export type ConnectionAction = {
     bot: User,
     secret: string,
     vendorId: string
+    clientSessionData?: object
 }
 
 export const connection: Reducer<ConnectionState> = (
@@ -462,7 +463,8 @@ export const connection: Reducer<ConnectionState> = (
                 user: action.user,
                 bot: action.bot,
                 secret: action.secret,
-                vendorId: action.vendorId
+                vendorId: action.vendorId,
+                clientSessionData: action.clientSessionData
             }
         case 'Start_Connection':
             return {
