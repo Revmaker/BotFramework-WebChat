@@ -184,8 +184,7 @@ export class Chat extends React.Component<ChatProps, {}> {
             window.CMS_URL = cmsUrl;
         }
 
-        // Fetch first and last name from session
-        // storage if it exists.
+        // Fetch first and last name from session storage if it exists.
         let user = { ...this.props.user };
         const sessionStorageUserData = JSON.parse(sessionStorage.getItem('User_Data'));
         if (sessionStorageUserData && sessionStorageUserData.firstName) { // Only proceed if first name exists
