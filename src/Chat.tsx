@@ -185,7 +185,8 @@ export class Chat extends React.Component<ChatProps, {}> {
         }
 
         // Get session data if it exists
-        const sessionStorageUserData = JSON.parse(sessionStorage.getItem('User_Data'));
+        // This is specific to BMW FS
+        const bmwUserSession = JSON.parse(sessionStorage.getItem('User_Data'));
 
         // Configure directline options
         this.store.dispatch<ChatActions>({
@@ -194,7 +195,7 @@ export class Chat extends React.Component<ChatProps, {}> {
             bot: this.props.bot,
             secret: this.props.secret,
             vendorId: this.props.vendorId,
-            clientSessionData: sessionStorageUserData
+            bmwUserSession
         });
 
         const storedMessages = getStoredMessages();
