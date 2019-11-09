@@ -16,7 +16,8 @@ export interface MessagePaneProps {
     children: React.ReactNode,
     doCardAction: IDoCardAction,
 
-    customPrevSvgPathData: string
+    customPrevSvgPathData: string,
+    customNextSvgPathData: string
 }
 
 const MessagePaneView = (props: MessagePaneProps) =>
@@ -69,7 +70,7 @@ class SuggestedActions extends React.Component<MessagePaneProps, {}> {
         return (
             <HScroll
                 prevSvgPathData={this.props.customPrevSvgPathData ? this.props.customPrevSvgPathData : "M 16.5 22 L 19 19.5 L 13.5 14 L 19 8.5 L 16.5 6 L 8.5 14 L 16.5 22 Z"}
-                nextSvgPathData={this.props.customPrevSvgPathData ? this.props.customPrevSvgPathData : "M 12.5 22 L 10 19.5 L 15.5 14 L 10 8.5 L 12.5 6 L 20.5 14 L 12.5 22 Z"}
+                nextSvgPathData={this.props.customNextSvgPathData ? this.props.customNextSvgPathData : "M 12.5 22 L 10 19.5 L 15.5 14 L 10 8.5 L 12.5 6 L 20.5 14 L 12.5 22 Z"}
                 scrollUnit="page"
             >
                 <ul>{this.props.activityWithSuggestedActions.suggestedActions.actions.map((action, index) =>
@@ -103,6 +104,7 @@ export const MessagePane = connect(
 }, (stateProps: any, dispatchProps: any, ownProps: any): MessagePaneProps => ({
     // from stateProps
     customPrevSvgPathData: ownProps.customPrevSvgPathData,
+    customNextSvgPathData: ownProps.customNextSvgPathData,
     activityWithSuggestedActions: stateProps.activityWithSuggestedActions,
     // from dispatchProps
     takeSuggestedAction: dispatchProps.takeSuggestedAction,
