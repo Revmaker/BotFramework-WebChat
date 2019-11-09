@@ -35,7 +35,9 @@ export interface ChatProps {
     sentryEnvironment: string,
     resize?: 'none' | 'window' | 'detect',
     cmsUrl: string,
-    customSendSvg: any
+    customSendSvg: any,
+    customPrevSvgPathData: string,
+    customNextSvgPathData: string
 }
 
 import { History } from './History';
@@ -184,22 +186,18 @@ export class Chat extends React.Component<ChatProps, {}> {
             window.CMS_URL = cmsUrl;
         }
 
-        // Fetch first and last name from session storage if it exists.
-        let user = { ...this.props.user };
-        const sessionStorageUserData = JSON.parse(sessionStorage.getItem('User_Data'));
-        if (sessionStorageUserData && sessionStorageUserData.firstName) { // Only proceed if first name exists
-            const { firstName, lastName } = sessionStorageUserData;
-            const clientUserName = lastName ? `${firstName} ${lastName}` : firstName;
-            user.name = clientUserName;
-        }
+        // Get session data if it exists
+        // This is specific to BMW FS
+        const bmwUserSession = JSON.parse(sessionStorage.getItem('User_Data'));
 
         // Configure directline options
         this.store.dispatch<ChatActions>({
             type: "Configure_DirectLine_Options",
-            user,
+            user: this.props.user,
             bot: this.props.bot,
             secret: this.props.secret,
-            vendorId: this.props.vendorId
+            vendorId: this.props.vendorId,
+            bmwUserSession
         });
 
         const storedMessages = getStoredMessages();
@@ -287,7 +285,7 @@ export class Chat extends React.Component<ChatProps, {}> {
                             <span>{typeof state.format.chatTitle === 'string' ? state.format.chatTitle : state.format.strings.title}</span>
                         </div>
                     }
-                    <MessagePane>
+                    <MessagePane customPrevSvgPathData={this.props.customPrevSvgPathData} customNextSvgPathData={this.props.customNextSvgPathData}>
                         <History
                             onCardAction={this._handleCardAction}
                             ref={this._saveHistoryRef}

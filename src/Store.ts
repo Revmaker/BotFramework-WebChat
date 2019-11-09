@@ -24,7 +24,7 @@ export type ThunkInterface<R> = ThunkAction<R, ChatState, void>;
 
 export function initializeConnection(): ThunkInterface<Promise<{}>> {
     return (dispatch: Dispatch<ChatState>, getState) => {
-        const { secret, vendorId, user, bot, selectedActivity } = getState().connection;
+        const { secret, vendorId, user, bot, selectedActivity, bmwUserSession } = getState().connection;
 
         return new Promise((resolve) => {
             const directLine = new DirectLine({
@@ -35,7 +35,8 @@ export function initializeConnection(): ThunkInterface<Promise<{}>> {
                 postActivity: function (activity: Activity) {
                     return directLine.postActivity(Object.assign({}, activity, {
                         channelData: {
-                            vendorId
+                            vendorId,
+                            bmwUserSession
                         }
                     }));
                 }
@@ -423,7 +424,8 @@ export interface ConnectionState {
     user: User,
     bot: User,
     secret: string,
-    vendorId: string
+    vendorId: string,
+    bmwUserSession?: object
 }
 
 export type ConnectionAction = {
@@ -441,6 +443,7 @@ export type ConnectionAction = {
     bot: User,
     secret: string,
     vendorId: string
+    bmwUserSession?: object
 }
 
 export const connection: Reducer<ConnectionState> = (
@@ -451,7 +454,8 @@ export const connection: Reducer<ConnectionState> = (
         user: undefined,
         bot: undefined,
         secret: undefined,
-        vendorId: undefined
+        vendorId: undefined,
+        bmwUserSession: undefined
     },
     action: ConnectionAction
 ) => {
@@ -462,7 +466,8 @@ export const connection: Reducer<ConnectionState> = (
                 user: action.user,
                 bot: action.bot,
                 secret: action.secret,
-                vendorId: action.vendorId
+                vendorId: action.vendorId,
+                bmwUserSession: action.bmwUserSession
             }
         case 'Start_Connection':
             return {
