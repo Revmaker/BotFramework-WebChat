@@ -35,7 +35,9 @@ export interface ChatProps {
     sentryEnvironment: string,
     resize?: 'none' | 'window' | 'detect',
     cmsUrl: string,
-    customSendSvg: any
+    customSendSvg: any,
+    customPrevSvgPathData: string,
+    customNextSvgPathData: string
 }
 
 import { History } from './History';
@@ -283,7 +285,7 @@ export class Chat extends React.Component<ChatProps, {}> {
                             <span>{typeof state.format.chatTitle === 'string' ? state.format.chatTitle : state.format.strings.title}</span>
                         </div>
                     }
-                    <MessagePane>
+                    <MessagePane customPrevSvgPathData={this.props.customPrevSvgPathData} customNextSvgPathData={this.props.customNextSvgPathData}>
                         <History
                             onCardAction={this._handleCardAction}
                             ref={this._saveHistoryRef}
