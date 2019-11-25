@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { findDOMNode } from 'react-dom';
+import * as Sentry from '@sentry/browser';
 
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
@@ -220,6 +221,9 @@ export class Chat extends React.Component<ChatProps, {}> {
                     data.forEach((activity) => {
                         this.store.dispatch<ChatActions>({ activity, type: "Receive_Message" })
                     });
+                })
+                .catch(error => {
+                    Sentry.captureException(error);
                 })
         }
 
