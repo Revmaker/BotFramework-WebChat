@@ -221,6 +221,9 @@ export class Chat extends React.Component<ChatProps, {}> {
                         this.store.dispatch<ChatActions>({ activity, type: "Receive_Message" })
                     });
                 })
+                .catch(error => {
+                    // Do nothing
+                })
         }
 
         if (this.props.resize === 'window')
