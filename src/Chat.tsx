@@ -223,7 +223,7 @@ export class Chat extends React.Component<ChatProps, {}> {
                     });
                 })
                 .catch(error => {
-                    Sentry.captureException(error);
+                    Sentry.captureException(error); // Send to Sentry
                 })
         }
 
