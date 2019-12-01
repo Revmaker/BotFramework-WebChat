@@ -336,7 +336,7 @@ export const doCardAction = (
 
             window.buttonClickCallback(payload);
         } catch (error) {
-            // Do nothing
+            Sentry.captureException(error);
         }
 
         switch (type) {
