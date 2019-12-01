@@ -223,7 +223,8 @@ export class Chat extends React.Component<ChatProps, {}> {
                     });
                 })
                 .catch(error => {
-                    Sentry.captureException(error); // Send to Sentry
+                    // Sentry.captureException(error); // Send to Sentry
+                    console.log('Request activities...', error);
                 })
         }
 
@@ -336,7 +337,8 @@ export const doCardAction = (
 
             window.buttonClickCallback(payload);
         } catch (error) {
-            Sentry.captureException(error);
+            // Sentry.captureException(error);
+            console.log('Route callback...', error);
         }
 
         switch (type) {
