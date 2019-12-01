@@ -223,7 +223,8 @@ export class Chat extends React.Component<ChatProps, {}> {
                 })
                 .catch(error => {
                     // Sentry.captureException(error); // Send to Sentry
-                    console.log('Request activities...', error);
+                    // console.log('Request activities...', error);
+                    // Do nothing...
                 })
         }
 
