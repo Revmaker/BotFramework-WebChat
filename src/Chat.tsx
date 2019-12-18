@@ -330,8 +330,13 @@ export const doCardAction = (
             }
 
             const payload = JSON.parse(text);
+
             if (payload.localResponse.route === undefined || payload.localResponse.route === null) {
                 throw new Error("Invalid route payload");
+            }
+
+            if (payload.localResponse.data === undefined || payload.localResponse.data === null) {
+                throw new Error("Invalid data payload");
             }
 
             window.buttonClickCallback(payload);
