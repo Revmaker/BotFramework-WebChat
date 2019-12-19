@@ -343,7 +343,6 @@ export const doCardAction = (
             window.buttonClickCallback(payload);
         } catch (error) {
             // Sentry.captureException(error);
-            // console.log('Route callback...', error);
             // Do nothing...
         }
 
