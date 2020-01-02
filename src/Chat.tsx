@@ -174,8 +174,6 @@ export class Chat extends React.Component<ChatProps, {}> {
     }
 
     componentDidMount() {
-
-        console.log('COMPONENT DID MOUNT IS RUNNING')
         const url_string = window.location.href;
         const url = new URL(url_string);
         const brainInitAction = url.searchParams.get("init_action") || "";
