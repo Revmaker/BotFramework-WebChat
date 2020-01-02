@@ -176,7 +176,7 @@ export class Chat extends React.Component<ChatProps, {}> {
     componentDidMount() {
         const url_string = window.location.href;
         const url = new URL(url_string);
-        const brainInitAction = url.searchParams.get("init_action") || "";
+        let brainInitAction = url.searchParams.get("init_action") || "";
 
         const { buttonClickCallback, cmsUrl } = this.props;
 
@@ -205,6 +205,8 @@ export class Chat extends React.Component<ChatProps, {}> {
             bmwUserSession,
             brainInitAction
         });
+
+        brainInitAction = "";
 
         const storedMessages = getStoredMessages();
 
