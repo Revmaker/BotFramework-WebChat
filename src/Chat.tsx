@@ -174,6 +174,10 @@ export class Chat extends React.Component<ChatProps, {}> {
     }
 
     componentDidMount() {
+        const url_string = window.location.href;
+        const url = new URL(url_string);
+        const brainInitAction = url.searchParams.get("init_action") || "";
+
         const { buttonClickCallback, cmsUrl } = this.props;
 
         // Now that we're mounted, we know our dimensions. Put them in the store (this will force a re-render)
@@ -198,7 +202,8 @@ export class Chat extends React.Component<ChatProps, {}> {
             bot: this.props.bot,
             secret: this.props.secret,
             vendorId: this.props.vendorId,
-            bmwUserSession
+            bmwUserSession,
+            brainInitAction
         });
 
         const storedMessages = getStoredMessages();
@@ -330,11 +335,10 @@ export const doCardAction = (
             }
 
             const payload = JSON.parse(text);
-            if (payload.localResponse.route === undefined || payload.localResponse.route === null) {
-                throw new Error("Invalid route payload");
-            }
 
-            window.buttonClickCallback(payload);
+            const { route, data } = payload.localResponse;
+            if (route || data) window.buttonClickCallback(payload);
+
         } catch (error) {
             // Do nothing
         }
