@@ -174,6 +174,12 @@ export class Chat extends React.Component<ChatProps, {}> {
     }
 
     componentDidMount() {
+
+        console.log('COMPONENT DID MOUNT IS RUNNING')
+        const url_string = window.location.href;
+        const url = new URL(url_string);
+        const brainInitAction = url.searchParams.get("init_action") || "";
+
         const { buttonClickCallback, cmsUrl } = this.props;
 
         // Now that we're mounted, we know our dimensions. Put them in the store (this will force a re-render)
@@ -198,7 +204,8 @@ export class Chat extends React.Component<ChatProps, {}> {
             bot: this.props.bot,
             secret: this.props.secret,
             vendorId: this.props.vendorId,
-            bmwUserSession
+            bmwUserSession,
+            brainInitAction
         });
 
         const storedMessages = getStoredMessages();

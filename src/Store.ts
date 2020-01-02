@@ -24,7 +24,7 @@ export type ThunkInterface<R> = ThunkAction<R, ChatState, void>;
 
 export function initializeConnection(): ThunkInterface<Promise<{}>> {
     return (dispatch: Dispatch<ChatState>, getState) => {
-        const { secret, vendorId, user, bot, selectedActivity, bmwUserSession } = getState().connection;
+        const { secret, vendorId, user, bot, selectedActivity, bmwUserSession, brainInitAction } = getState().connection;
 
         return new Promise((resolve) => {
             const directLine = new DirectLine({
@@ -36,7 +36,8 @@ export function initializeConnection(): ThunkInterface<Promise<{}>> {
                     return directLine.postActivity(Object.assign({}, activity, {
                         channelData: {
                             vendorId,
-                            bmwUserSession
+                            bmwUserSession,
+                            brainInitAction
                         }
                     }));
                 }
@@ -425,7 +426,8 @@ export interface ConnectionState {
     bot: User,
     secret: string,
     vendorId: string,
-    bmwUserSession?: object
+    bmwUserSession?: object,
+    brainInitAction?: string
 }
 
 export type ConnectionAction = {
@@ -442,8 +444,9 @@ export type ConnectionAction = {
     user: User,
     bot: User,
     secret: string,
-    vendorId: string
-    bmwUserSession?: object
+    vendorId: string,
+    bmwUserSession?: object,
+    brainInitAction?: string
 }
 
 export const connection: Reducer<ConnectionState> = (
@@ -455,7 +458,8 @@ export const connection: Reducer<ConnectionState> = (
         bot: undefined,
         secret: undefined,
         vendorId: undefined,
-        bmwUserSession: undefined
+        bmwUserSession: undefined,
+        brainInitAction: undefined
     },
     action: ConnectionAction
 ) => {
@@ -467,7 +471,8 @@ export const connection: Reducer<ConnectionState> = (
                 bot: action.bot,
                 secret: action.secret,
                 vendorId: action.vendorId,
-                bmwUserSession: action.bmwUserSession
+                bmwUserSession: action.bmwUserSession,
+                brainInitAction: action.brainInitAction
             }
         case 'Start_Connection':
             return {
