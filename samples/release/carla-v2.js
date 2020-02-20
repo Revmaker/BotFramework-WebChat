@@ -272,6 +272,7 @@ var carlaBot = (function () {
       document
         .body
         .appendChild(_chatWidget);
+      hideTeaserIfElementIsInView();
     }
 
     var displayBot = function () {
@@ -445,6 +446,58 @@ var carlaBot = (function () {
     __carlaEventHandlers.openChat();
   }
 
+
+  function isInViewport (el) {
+    var top = el.offsetTop;
+    var left = el.offsetLeft;
+    var width = el.offsetWidth;
+    var height = el.offsetHeight;
+
+    while(el.offsetParent) {
+      el = el.offsetParent;
+      top += el.offsetTop;
+      left += el.offsetLeft;
+    }
+
+    return (
+      top < (window.pageYOffset + window.innerHeight) &&
+      left < (window.pageXOffset + window.innerWidth) &&
+      (top + height) > window.pageYOffset &&
+      (left + width) > window.pageXOffset
+    );
+  };
+
+  function hideTeaserIfElementIsInView() {
+    var elementToQuery = carlaBotConfigs.HIDE_TEASER_IF_ELEMENT_IN_VIEW;
+    if(!elementToQuery){
+      return false;
+    }
+    var element = document.querySelector(elementToQuery);
+    if(isInViewport(element)){
+      _chatWidget.style.visibility = "hidden";
+      return false;
+    }
+    _chatWidget.style.visibility = "visible";
+  }
+
+  function throttle(fn, waitMs) {
+    var time = Date.now();
+    var lastScrollPosition = document.body.scrollTop || document.documentElement.scrollTop;
+    return function() {
+      var currentScrollPosition = document.body.scrollTop || document.documentElement.scrollTop;
+      if (
+          (time + waitMs - Date.now()) < 0 ||
+          Math.abs(lastScrollPosition - currentScrollPosition) > 19
+        ) {
+        fn();
+        time = Date.now();
+        lastScrollPosition = currentScrollPosition;
+      }
+    }
+  }
+
+  window.addEventListener('scroll', throttle(hideTeaserIfElementIsInView, 1000));
+
   /* Please bear with the name mismatching it is done for backward compactibility
     The `init` bot now initializes and displays the bot
     While `load` just initializes the bot to be displayed when you open the chat
@@ -455,6 +508,7 @@ var carlaBot = (function () {
     openChat: openChat,
     closeChat: __carlaEventHandlers.closeChat,
   };
+
 
 })();
 
