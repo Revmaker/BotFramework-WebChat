@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { findDOMNode } from 'react-dom';
+import * as Sentry from '@sentry/browser';
 
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
@@ -25,6 +26,7 @@ export interface ChatProps {
     bot: User,
     botConnection: DirectLine,
     actionEndpointUrl: string,
+    willSendInitialRequestAction?: boolean;
     speechOptions?: SpeechOptions,
     locale?: string,
     selectedActivity?: BehaviorSubject<ActivityOrID>,
@@ -65,7 +67,6 @@ export class Chat extends React.Component<ChatProps, {}> {
 
     constructor(props: ChatProps) {
         super(props);
-
         konsole.log("BotChat.Chat props", props);
 
         this.store.dispatch<ChatActions>({
@@ -172,36 +173,9 @@ export class Chat extends React.Component<ChatProps, {}> {
         this.shellRef = shellWrapper && shellWrapper.getWrappedInstance();
     }
 
-    componentDidMount() {
-        const { buttonClickCallback, cmsUrl } = this.props;
-
-        // Now that we're mounted, we know our dimensions. Put them in the store (this will force a re-render)
-        this.setSize();
-
-        if (buttonClickCallback) {
-            window.buttonClickCallback = buttonClickCallback;
-        }
-
-        if (cmsUrl) {
-            window.CMS_URL = cmsUrl;
-        }
-
-        // Get session data if it exists
-        // This is specific to BMW FS
-        const bmwUserSession = JSON.parse(sessionStorage.getItem('User_Data'));
-
-        // Configure directline options
-        this.store.dispatch<ChatActions>({
-            type: "Configure_DirectLine_Options",
-            user: this.props.user,
-            bot: this.props.bot,
-            secret: this.props.secret,
-            vendorId: this.props.vendorId,
-            bmwUserSession
-        });
-
+    private sendInitialActionRequest() {
+        // If small screen ignore all this
         const storedMessages = getStoredMessages();
-
         // Activities in storage, add them to history.
         if (storedMessages.length > 0) {
             storedMessages.forEach((activity: Activity) => {
@@ -222,14 +196,65 @@ export class Chat extends React.Component<ChatProps, {}> {
                     });
                 })
                 .catch(error => {
-                    // Sentry.captureException(error); // Send to Sentry
-                    // console.log('Request activities...', error);
-                    // Do nothing...
+                    Sentry.captureException(error);
                 })
         }
+    }
 
-        if (this.props.resize === 'window')
+    private onReceiveWindowMessage(event: MessageEvent) {
+        if (event.origin !== location.origin){
+            return;
+        }
+        if(event.data === 'SEND_INITIAL_ACTION_REQUEST'){
+            this.sendInitialActionRequest();
+        }
+    }
+
+    componentDidMount() {
+        const url_string = window.location.href;
+
+        const { buttonClickCallback, cmsUrl } = this.props;
+
+        // Now that we're mounted, we know our dimensions. Put them in the store (this will force a re-render)
+        this.setSize();
+
+        if (buttonClickCallback) {
+            window.buttonClickCallback = buttonClickCallback;
+        }
+
+        if (cmsUrl) {
+            window.CMS_URL = cmsUrl;
+        }
+
+        // Get session data if it exists
+        // This is specific to BMW FS
+        let bmwUserSession = null;
+        const bmwUserData = sessionStorage.getItem('User_Data');
+        if(bmwUserData){
+            bmwUserSession = JSON.parse(bmwUserData);
+        }
+
+        // Configure directline options
+        this.store.dispatch<ChatActions>({
+            type: "Configure_DirectLine_Options",
+            user: this.props.user,
+            bot: this.props.bot,
+            secret: this.props.secret,
+            vendorId: this.props.vendorId,
+            bmwUserSession
+        });
+
+        if (this.props.resize === 'window'){
             window.addEventListener('resize', this.resizeListener);
+        }
+
+        if(this.props.willSendInitialRequestAction){
+            window.addEventListener("message", (event) => {
+                this.onReceiveWindowMessage(event);
+            }, false);
+        }else{
+            this.sendInitialActionRequest();
+        }
     }
 
     componentWillUnmount() {
@@ -241,6 +266,9 @@ export class Chat extends React.Component<ChatProps, {}> {
         //if (this.botConnection)
         //    this.botConnection.end();
         window.removeEventListener('resize', this.resizeListener);
+        if(this.props.willSendInitialRequestAction){
+            window.removeEventListener('message', this.onReceiveWindowMessage);
+        }
     }
 
     componentWillReceiveProps(nextProps: ChatProps) {
@@ -351,7 +379,7 @@ export const doCardAction = (
                 break;
             case "locationButton":
                 if ("geolocation" in navigator) {
-                    navigator.geolocation.getCurrentPosition(function (position) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
                         const locationMessage = getLocationMessage(position.coords.latitude, position.coords.longitude);
                         sendPostBack(locationMessage, value);
                         addMessage(buttonTitle, from, locale);
@@ -397,7 +425,7 @@ export const classList = (...args: (string | boolean)[]) => {
     return args.filter(Boolean).join(' ');
 }
 
-const getLocationMessage = function (lat: number, long: number) {
+const getLocationMessage = function(lat: number, long: number) {
     const message = {
         localResponse: {
             result: {

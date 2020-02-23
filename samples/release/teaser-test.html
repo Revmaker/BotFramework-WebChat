@@ -10,6 +10,8 @@
 
 <body style="height: 1300px; background-image: linear-gradient(to bottom right, rgba(245, 245, 245, 0.308), rgb(170, 170, 170)); font-family: sans-serif;">
 
+  <style>
+  </style>
   <script src="./carla-v2.js"></script>
   <script>
 
@@ -26,6 +28,10 @@
     */
 
     // call the bot init function with the bot url and fb credentials
+    carlaBotConfigs.KIAN_CHAT_WIDGET_TEXT = '^1000Need help?^2000 Ask Kian!^2000';
+    carlaBotConfigs.KIAN_CHAT_CONTAINER_HEADER_TEXT = 'KMA';
+    carlaBotConfigs.CHAT_CONTAINER_PLACEMENT = 'right';
+    carlaBotConfigs.CHAT_CONTAINER_OFFSET = 0;
     carlaBot.init({
       botUrl: "./bot.html",
       appId: '', // Facebook App ID here

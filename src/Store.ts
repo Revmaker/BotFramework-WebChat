@@ -442,7 +442,7 @@ export type ConnectionAction = {
     user: User,
     bot: User,
     secret: string,
-    vendorId: string
+    vendorId: string,
     bmwUserSession?: object
 }
 
