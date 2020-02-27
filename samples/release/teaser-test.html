@@ -10,6 +10,14 @@
 
 <body style="height: 1300px; background-image: linear-gradient(to bottom right, rgba(245, 245, 245, 0.308), rgb(170, 170, 170)); font-family: sans-serif;">
 
+  <div style="height: 1000px; background: red;">
+
+  </div>
+
+    <div style="height: 300px; background: blue;" id="footer">
+
+  </div>
+
   <style>
   </style>
   <script src="./carla-v2.js"></script>
@@ -32,6 +40,7 @@
     carlaBotConfigs.KIAN_CHAT_CONTAINER_HEADER_TEXT = 'KMA';
     carlaBotConfigs.CHAT_CONTAINER_PLACEMENT = 'right';
     carlaBotConfigs.CHAT_CONTAINER_OFFSET = 0;
+    carlaBotConfigs.HIDE_TEASER_IF_ELEMENT_IN_VIEW = '#footer';
     carlaBot.init({
       botUrl: "./bot.html",
       appId: '', // Facebook App ID here
